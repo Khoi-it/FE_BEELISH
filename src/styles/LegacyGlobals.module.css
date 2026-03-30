@@ -1,0 +1,115 @@
+:global(.chunky-border) {
+  border: 3px solid #283f3b;
+}
+
+:global(.chunky-shadow) {
+  box-shadow: 4px 4px 0px 0px #283f3b;
+}
+
+:global(.chunky-shadow-active:active) {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px #283f3b;
+}
+
+:global(.squircle) {
+  border-radius: 20%;
+}
+
+/* Homepage/Videos shared "chunky" components */
+:global(.chunky-card) {
+  border: 3px solid black;
+  box-shadow: 6px 6px 0px 0px #283f3b;
+  transition: transform 0.1s ease;
+}
+
+:global(.chunky-card:hover) {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px 0px #283f3b;
+}
+
+:global(.chunky-btn) {
+  border: 3px solid black;
+  box-shadow: 4px 4px 0px 0px #283f3b;
+}
+
+:global(.chunky-btn:active) {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px #283f3b;
+}
+
+:global(.chunky-shadow-sm) {
+  box-shadow: 2px 2px 0px 0px #283f3b;
+}
+
+/* Honeycomb / activity graph */
+:global(.hexagon) {
+  background-color: #f3f4f6;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border: 1px solid black;
+  width: 30px;
+  height: 34px;
+}
+
+:global(.hexagon.filled) {
+  background-color: #ffbf00;
+}
+
+:global(.honeycomb-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: 8px;
+}
+
+/* Optional: legacy scrollbar class */
+:global(.custom-scrollbar)::-webkit-scrollbar {
+  width: 8px;
+}
+
+:global(.custom-scrollbar)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:global(.custom-scrollbar)::-webkit-scrollbar-thumb {
+  background: #283f3b;
+  border-radius: 10px;
+}
+
+/* Vocabulary / brutalist cards */
+:global(.brutalist-shadow) {
+  box-shadow: 4px 4px 0px 0px #283f3b;
+}
+
+:global(.brutalist-shadow-lg) {
+  box-shadow: 8px 8px 0px 0px #283f3b;
+}
+
+:global(.brutalist-shadow-hover:hover) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #283f3b;
+}
+
+/* Auth / login-style card shadow + 3D buttons */
+:global(.chunky-shadow-login) {
+  box-shadow: 6px 6px 0px 0px #283f3b;
+}
+
+:global(.button-3d-primary) {
+  box-shadow: 0px 4px 0px 0px #cc9900;
+  transition: all 0.1s ease;
+}
+
+:global(.button-3d-primary:active) {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 0px 0px #cc9900;
+}
+
+:global(.button-3d-secondary) {
+  box-shadow: 0px 4px 0px 0px #d1d5db;
+  transition: all 0.1s ease;
+}
+
+:global(.button-3d-secondary:active) {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 0px 0px #d1d5db;
+}
+

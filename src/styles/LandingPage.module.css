@@ -1,0 +1,29 @@
+.page {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #e5d1d0;
+  color: #283f3b;
+}
+
+.chunkyBorder {
+  border: 3px solid #283f3b;
+}
+
+.shadowChunky {
+  box-shadow: 4px 4px 0 0 #283f3b;
+}
+
+.shadowChunkyLg {
+  box-shadow: 8px 8px 0 0 #283f3b;
+}
+
+.shadowChunkyHover {
+  box-shadow: 2px 2px 0 0 #283f3b;
+}
+
+.chunkyButton {
+  box-shadow: 4px 4px 0 0 #283f3b;
+}
+
+.chunkyButton:hover {
+  box-shadow: 2px 2px 0 0 #283f3b;
+}
