@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        setUser(null); // Xóa dữ liệu trên đài phát thanh
-        window.location.href = '/login'; // Đá về trang login
+        setUser(null);
+        window.location.href = '/login';
     };
 
     return (

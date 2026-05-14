@@ -1,6 +1,5 @@
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import AppHeader from '../components/layout/AppHeader.jsx'
-import {useNavigate} from "react-router-dom";
 import {useAuth} from "../contexts/AuthContext.tsx";
 
 function StatCard({label, value, accentClassName, subValue, subValueClassName}) {
