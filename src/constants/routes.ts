@@ -9,7 +9,3 @@ export const ROUTES = {
   PROFILE: '/profile',
 }
 
-export function routeHash(route: string) {
-  return route
-}
-
