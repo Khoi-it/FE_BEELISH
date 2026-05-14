@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import HomePage from './pages/HomePage.jsx'
 import DictationPage from './pages/DictationPage'
@@ -9,42 +9,18 @@ import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage'
 import { ROUTES } from './constants/routes'
 
-function getRouteFromHash() {
-    if (typeof window === 'undefined') return ROUTES.LANDING
-    const raw = window.location.hash.replace('#', '').trim()
-    return raw || ROUTES.LANDING
-}
-
 export default function App() {
-    const [route, setRoute] = useState(getRouteFromHash)
-
-    useEffect(() => {
-        const onHashChange = () => setRoute(getRouteFromHash())
-        window.addEventListener('hashchange', onHashChange)
-        return () => window.removeEventListener('hashchange', onHashChange)
-    }, [])
-
-    const page = useMemo(() => {
-        switch (route) {
-            case ROUTES.DICTATION:
-                return <DictationPage/>
-            case ROUTES.VIDEO:
-                return <VideoPage/>
-            case ROUTES.VOCABULARY:
-                return <VocabularyPage/>
-            case ROUTES.REGISTER:
-                return <RegisterPage/>
-            case ROUTES.LOGIN:
-                return <LoginPage/>
-            case ROUTES.PROFILE:
-                return <ProfilePage/>
-            case ROUTES.HOME:
-                return <HomePage/>
-            case ROUTES.LANDING:
-            default:
-                return <LandingPage/>
-        }
-    }, [route])
-
-    return page || <LandingPage/>
+    return (
+        <Routes>
+            <Route path={ROUTES.LANDING} element={<LandingPage />} />
+            <Route path={ROUTES.HOME} element={<HomePage />} />
+            <Route path={ROUTES.DICTATION} element={<DictationPage />} />
+            <Route path={ROUTES.VIDEO} element={<VideoPage />} />
+            <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
+            <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+            <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+            <Route path="*" element={<Navigate to={ROUTES.LANDING} replace />} />
+        </Routes>
+    )
 }
