@@ -1,4 +1,4 @@
-import styles from '../../styles/LandingPage.module.css'
+// import styles from '../../styles/LandingPage.module.css'
 
 export default function CtaSection() {
   return (
@@ -23,7 +23,7 @@ export default function CtaSection() {
         <div className="flex flex-col justify-center gap-6 sm:flex-row">
           <button
             type="button"
-            className={`rounded-2xl bg-[#ffbf00] px-12 py-5 text-xl font-black uppercase text-[#283f3b] transition-all hover:translate-x-1 hover:translate-y-1 ${styles.chunkyBorder}`}
+            className={`rounded-2xl bg-[#ffbf00] px-12 py-5 text-xl font-black uppercase text-[#283f3b] transition-all hover:translate-x-1 hover:translate-y-1 border-[3px] border-[#283f3b]`}
             style={{ boxShadow: '4px 4px 0 0 white' }}
           >
             Bắt đầu học miễn phí

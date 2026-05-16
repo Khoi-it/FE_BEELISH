@@ -1,7 +1,7 @@
 import {useState} from 'react'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, Link} from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
-import {ROUTES, routeHash} from '../constants/routes'
+import {ROUTES} from '../constants/routes'
 import {useAuth} from "../contexts/AuthContext.tsx";
 
 export default function LoginPage() {
@@ -195,10 +195,10 @@ export default function LoginPage() {
                     {/* Footer link */}
                     <p className="mt-6 text-center text-sm font-bold text-moss-green">
                         Chưa có tài khoản?
-                        <a className="ml-1 text-primary hover:underline underline-offset-4 decoration-2"
-                           href={routeHash(ROUTES.REGISTER)}>
+                        <Link className="ml-1 text-primary hover:underline underline-offset-4 decoration-2"
+                           to={ROUTES.REGISTER}>
                             Tham gia ngay
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </main>

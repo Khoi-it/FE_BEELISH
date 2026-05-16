@@ -1,4 +1,3 @@
-import styles from '../../styles/LandingPage.module.css'
 import iconImage from "../../assets/icon.png";
 import textImage from "../../assets/text.png";
 
@@ -60,7 +59,7 @@ export default function Footer() {
               <a
                 key={icon}
                 href="#"
-                className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[#ffbf00] ${styles.chunkyBorder} ${styles.shadowChunky}`}
+                className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[#ffbf00] border-[3px] border-[#283f3b] shadow-[4px_4px_0_0_#283f3b]`}
               >
                 <span className="material-symbols-outlined text-xl">{icon}</span>
               </a>
