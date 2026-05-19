@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
-import { ROUTES, routeHash } from '../constants/routes'
+import { ROUTES } from '../constants/routes'
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
@@ -176,9 +177,9 @@ export default function RegisterPage() {
 
           <p className="mt-8 text-center text-sm font-bold text-moss-green">
             Đã có tài khoản?
-            <a className="ml-1 text-primary hover:underline underline-offset-4 decoration-2" href={routeHash(ROUTES.LOGIN)}>
+            <Link className="ml-1 text-primary hover:underline underline-offset-4 decoration-2" to={ROUTES.LOGIN}>
               Đăng nhập
-            </a>
+            </Link>
           </p>
         </div>
       </main>

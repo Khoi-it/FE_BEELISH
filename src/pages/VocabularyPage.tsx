@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import '../styles/LegacyGlobals.module.css'
 import AppHeader from '../components/layout/AppHeader.jsx'
 
 const WORDS = [

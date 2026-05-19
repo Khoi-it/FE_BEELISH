@@ -1,12 +1,12 @@
-import styles from '../../styles/LandingPage.module.css'
+// import styles from '../../styles/LandingPage.module.css'
 
 export default function FeatureCard({ icon, title, description, iconBg }) {
   return (
     <article
-      className={`group flex h-full cursor-default flex-col rounded-2xl bg-white p-8 ${styles.chunkyBorder} ${styles.shadowChunkyLg} transition-all duration-300 ease-out hover:-translate-y-3 hover:shadow-[8px_12px_0_0_#283f3b]`}
+      className={`group flex h-full cursor-default flex-col rounded-2xl bg-white p-8 border-[3px] border-[#283f3b] shadow-[8px_8px_0_0_#283f3b] transition-all duration-300 ease-out hover:-translate-y-3 hover:shadow-[8px_12px_0_0_#283f3b]`}
     >
       <div
-        className={`mb-8 flex h-16 w-16 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:-translate-y-0.5 ${styles.chunkyBorder} ${styles.shadowChunky}`}
+        className={`mb-8 flex h-16 w-16 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:-translate-y-0.5 border-[3px] border-[#283f3b] shadow-[4px_4px_0_0_#283f3b]`}
         style={{ backgroundColor: iconBg }}
       >
         <span className="material-symbols-outlined text-3xl font-black">{icon}</span>

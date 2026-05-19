@@ -1,4 +1,5 @@
-import { ROUTES, routeHash } from '../../constants/routes'
+import { ROUTES } from '../../constants/routes'
+import { Link } from 'react-router-dom'
 
 export default function VideoCard({
   imageSrc,
@@ -10,8 +11,8 @@ export default function VideoCard({
   timeAgo,
 }) {
   return (
-    <a
-      href={routeHash(ROUTES.DICTATION)}
+    <Link
+      to={ROUTES.DICTATION}
       className="flex cursor-pointer flex-col overflow-hidden rounded-xl border-none bg-white chunky-border shadow-chunky transition-all group hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
       aria-label={`Mở bài học: ${title}`}
     >
@@ -36,7 +37,7 @@ export default function VideoCard({
           <span>{timeAgo}</span>
         </div>
       </div>
-    </a>
+    </Link>
   )
 }
 
