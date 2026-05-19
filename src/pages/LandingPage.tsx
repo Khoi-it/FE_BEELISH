@@ -5,6 +5,7 @@ import FeaturesSection from '../components/sections/FeaturesSection'
 import CtaSection from '../components/sections/CtaSection'
 import styles from '../styles/LandingPage.module.css'
 
+
 export default function LandingPage() {
   return (
     <div className={styles.page}>

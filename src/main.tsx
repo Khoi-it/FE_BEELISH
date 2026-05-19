@@ -4,7 +4,7 @@ import {BrowserRouter} from 'react-router-dom'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import './index.css'
-import App from './App.jsx'
+import App from './App.tsx'
 import {AuthProvider} from "./contexts/AuthContext.tsx";
 
 createRoot(document.getElementById('root')!).render(
