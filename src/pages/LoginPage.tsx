@@ -3,6 +3,7 @@ import {useNavigate, Link} from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import {ROUTES} from '../constants/routes'
 import {useAuth} from "../contexts/AuthContext.tsx";
+import Footer from '../components/layout/Footer.tsx';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')
@@ -203,19 +204,7 @@ export default function LoginPage() {
                 </div>
             </main>
 
-            <footer className="p-4 text-center">
-                <div className="inline-flex items-center gap-2 text-xs font-bold text-moss-green/40">
-                    <span>© 2024 Beelish Co.</span>
-                    <span>•</span>
-                    <a className="hover:text-moss-green" href="#">
-                        Bảo mật
-                    </a>
-                    <span>•</span>
-                    <a className="hover:text-moss-green" href="#">
-                        Điều khoản
-                    </a>
-                </div>
-            </footer>
+            <Footer/>
         </div>
     )
 }

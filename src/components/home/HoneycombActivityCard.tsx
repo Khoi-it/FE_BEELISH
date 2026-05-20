@@ -1,3 +1,12 @@
+const MOCK_HONEYCOMB = {
+  stats: {
+    title: "TUYỆT VỜI!",
+    description: "Bạn đã chăm chỉ hơn 85% học viên khác."
+  },
+  row1: [true, true, true, false, true, true, true, false, true, true, true, true, true, true, false, true, true, false, true, true, true, false, true, true, true],
+  row2: [true, true, false, true, true, true, true, false, true, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true]
+};
+
 export default function HoneycombActivityCard() {
   return (
     <div className="col-span-12 chunky-card bg-white p-8">
@@ -19,68 +28,23 @@ export default function HoneycombActivityCard() {
           <div className="flex flex-wrap gap-4 justify-between">
             <div className="flex flex-col gap-6">
               <div className="flex flex-wrap gap-2 max-w-4xl">
-                {/* Row 1 */}
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
+                {MOCK_HONEYCOMB.row1.map((isFilled, idx) => (
+                  <div key={`r1-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} />
+                ))}
               </div>
 
               <div className="flex flex-wrap gap-2 max-w-4xl ml-4">
-                {/* Row 2 (offset) */}
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
-                <div className="hexagon" />
-                <div className="hexagon filled" />
-                <div className="hexagon filled" />
+                {MOCK_HONEYCOMB.row2.map((isFilled, idx) => (
+                  <div key={`r2-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} />
+                ))}
               </div>
             </div>
 
             <div className="max-w-[200px] rounded-2xl border-3 border-dashed border-black bg-primary/20 p-6 text-center flex flex-col items-center justify-center">
               <span className="material-symbols-outlined mb-2 fill-1 text-4xl text-primary">hive</span>
-              <h4 className="text-lg font-black">TUYỆT VỜI!</h4>
+              <h4 className="text-lg font-black">{MOCK_HONEYCOMB.stats.title}</h4>
               <p className="leading-tight text-xs font-bold">
-                Bạn đã chăm chỉ hơn 85% học viên khác.
+                {MOCK_HONEYCOMB.stats.description}
               </p>
             </div>
           </div>
@@ -101,4 +65,3 @@ export default function HoneycombActivityCard() {
     </div>
   )
 }
-
