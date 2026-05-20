@@ -5,7 +5,7 @@ interface DeckCardProps {
   progress: number;
   barClass: string;
   iconWrapClass: string;
-  onSelect: (title: string) => void;
+  onSelect: () => void;
 }
 
 export default function DeckCard({ icon, title, wordCount, progress, barClass, iconWrapClass, onSelect }: DeckCardProps) {
@@ -13,11 +13,11 @@ export default function DeckCard({ icon, title, wordCount, progress, barClass, i
     <div
       role="button"
       tabIndex={0}
-      onClick={() => onSelect?.(title)}
+      onClick={onSelect}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onSelect?.(title)
+          onSelect?.()
         }
       }}
       className="group cursor-pointer rounded-xl border-4 border-secondary bg-surface-variant p-6 transition-all brutalist-shadow-lg brutalist-shadow-hover"

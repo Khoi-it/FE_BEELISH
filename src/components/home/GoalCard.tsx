@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { getGoalProgress } from '../../api/homeApi';
+
 const MOCK_GOAL = {
   title: "Mục tiêu hôm nay",
   progressPercent: 70,
@@ -6,11 +9,27 @@ const MOCK_GOAL = {
 };
 
 export default function GoalCard() {
-  const dashoffset = 440 - (440 * MOCK_GOAL.progressPercent) / 100;
+  const [goalData, setGoalData] = useState(MOCK_GOAL);
+
+  useEffect(() => {
+    const fetchGoal = async () => {
+      try {
+        const data = await getGoalProgress();
+        if (data) {
+          setGoalData(data);
+        }
+      } catch (error) {
+        console.warn("Dùng mock data do API GoalCard chưa sẵn sàng:", error);
+      }
+    };
+    fetchGoal();
+  }, []);
+
+  const dashoffset = 440 - (440 * goalData.progressPercent) / 100;
 
   return (
     <div className="col-span-12 flex flex-col items-center justify-center gap-0 p-6 text-center lg:col-span-4 chunky-card bg-white">
-      <h3 className="mb-6 text-xl font-black uppercase tracking-tight">{MOCK_GOAL.title}</h3>
+      <h3 className="mb-6 text-xl font-black uppercase tracking-tight">{goalData.title}</h3>
 
       <div className="relative mb-6 flex h-40 w-40 items-center justify-center">
         <svg className="h-full w-full -rotate-90">
@@ -41,14 +60,14 @@ export default function GoalCard() {
           <span className="mb-1 font-black text-4xl text-primary material-symbols-outlined">
             emoji_events
           </span>
-          <span className="text-2xl font-black">{MOCK_GOAL.progressPercent}%</span>
+          <span className="text-2xl font-black">{goalData.progressPercent}%</span>
         </div>
       </div>
 
-      <p className="mb-6 font-bold text-slate-500">{MOCK_GOAL.message}</p>
+      <p className="mb-6 font-bold text-slate-500">{goalData.message}</p>
 
       <button className="w-full rounded-xl bg-primary py-3 text-lg font-black chunky-btn">
-        {MOCK_GOAL.buttonText}
+        {goalData.buttonText}
       </button>
     </div>
   )

@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react'
 import AppHeader from '../components/layout/AppHeader.jsx'
 import VideoLibraryHeader from '../components/video/VideoLibraryHeader'
 import VideoGrid from '../components/video/VideoGrid'
+import { getVideos } from '../api/videosApi'
 
-const videos = [
+const MOCK_VIDEOS = [
   {
     imageSrc:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuD6OOcPXQYK6k9N0rtQGHK1dj9Z6vrqj3XFmxlLgo7dcBDlxch1YH-cZqDLAGyLNwvfxlzpIMjmRudn63BoqpNvs1yJIcA_jMGgvKIJg2NoUZThQGCaB2qwh_iC_G9JXWoygkn7pdZOBaebCisiF-XhcsbadzxoAqAI-PSZS0Utmh7e7YPH2f4IPR-2NI_Q6Xfe1AXweVPoMNcWSa1xCAeWvIkjSYk07mbm4gQdBV53k93diQ-iNPnQ7kbLrn3DROdbhkfAViQoKZg',
@@ -86,6 +88,24 @@ const videos = [
 ]
 
 export default function VideoPage() {
+  const [videoList, setVideoList] = useState(MOCK_VIDEOS);
+
+  useEffect(() => {
+    const fetchVideoList = async () => {
+      try {
+        const data = await getVideos();
+        // Fallback or map data if needed. 
+        // For now, assuming API returns array of objects with same schema
+        if (data && data.length > 0) {
+          setVideoList(data);
+        }
+      } catch (err) {
+        console.warn('API error (Videos), using mock videos:', err);
+      }
+    };
+    fetchVideoList();
+  }, []);
+
   return (
     <div className="flex h-screen overflow-hidden bg-[#E5D1D0] font-display text-border-dark">
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -96,11 +116,10 @@ export default function VideoPage() {
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 custom-scrollbar">
           <div className="mx-auto max-w-[1440px]">
             <VideoLibraryHeader />
-            <VideoGrid videos={videos} />
+            <VideoGrid videos={videoList} />
           </div>
         </div>
       </main>
     </div>
   )
 }
-

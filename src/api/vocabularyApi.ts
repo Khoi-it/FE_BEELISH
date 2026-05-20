@@ -1,17 +1,26 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
 import { fetchWithAuth } from './fetchClient';
 
-export const getVocabulary = async (params?: Record<string, string>) => {
-    const query = params ? '?' + new URLSearchParams(params).toString() : '';
-    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCABULARY}${query}`, {
+export const getUserVocabSets = async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.USER_VOCAB_SETS}`, {
         method: 'GET'
     });
+    if (!response.ok) throw new Error('Failed to fetch user vocab sets');
     return response.json();
 };
 
-export const getVocabularyById = async (id: string | number) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCABULARY}/${id}`, {
+export const getSystemVocabSets = async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}`, {
         method: 'GET'
     });
+    if (!response.ok) throw new Error('Failed to fetch system vocab sets');
+    return response.json();
+};
+
+export const getWordsByDeckId = async (setId: string | number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.WORDS}?setId=${setId}`, {
+        method: 'GET'
+    });
+    if (!response.ok) throw new Error('Failed to fetch words');
     return response.json();
 };

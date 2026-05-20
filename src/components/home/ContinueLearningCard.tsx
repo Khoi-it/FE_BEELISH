@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { getContinueLearning } from '../../api/homeApi';
+
 const MOCK_LESSON = {
   level: "Trung cấp",
   imageAlt: "Restaurant lesson",
@@ -10,12 +13,28 @@ const MOCK_LESSON = {
 };
 
 export default function ContinueLearningCard() {
+  const [lessonData, setLessonData] = useState(MOCK_LESSON);
+
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        const data = await getContinueLearning();
+        if (data) {
+          setLessonData(data);
+        }
+      } catch (error) {
+        console.warn("Dùng mock data do API ContinueLearning chưa sẵn sàng:", error);
+      }
+    };
+    fetchLesson();
+  }, []);
+
   return (
     <div className="col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white">
       <div className="flex items-center justify-between border-b-3 border-black bg-primary/10 p-6">
         <h3 className="text-xl font-black uppercase tracking-tight">Tiếp tục học</h3>
         <span className="rounded-full bg-black px-3 py-1 text-xs font-black uppercase tracking-widest text-white">
-          {MOCK_LESSON.level}
+          {lessonData.level}
         </span>
       </div>
 
@@ -23,10 +42,10 @@ export default function ContinueLearningCard() {
         <div className="md:w-1/2 p-4">
           <div className="relative aspect-video overflow-hidden rounded-xl border-3 border-black group">
             <img
-              alt={MOCK_LESSON.imageAlt}
+              alt={lessonData.imageAlt}
               className="h-full w-full object-cover"
-              data-alt={MOCK_LESSON.dataAlt}
-              src={MOCK_LESSON.imageSrc}
+              data-alt={lessonData.dataAlt}
+              src={lessonData.imageSrc}
             />
 
             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -36,24 +55,24 @@ export default function ContinueLearningCard() {
             </div>
 
             <div className="absolute bottom-3 right-3 rounded-md bg-black px-2 py-1 text-xs font-bold text-white">
-              {MOCK_LESSON.duration}
+              {lessonData.duration}
             </div>
           </div>
         </div>
 
         <div className="md:w-1/2 p-6 flex flex-col justify-center">
-          <h4 className="mb-2 leading-tight text-2xl font-black">{MOCK_LESSON.title}</h4>
+          <h4 className="mb-2 leading-tight text-2xl font-black">{lessonData.title}</h4>
           <p className="mb-6 font-bold text-slate-500">
-            {MOCK_LESSON.description}
+            {lessonData.description}
           </p>
 
           <div className="mb-6">
             <div className="mb-2 flex justify-between text-sm font-black uppercase">
               <span>Tiến độ bài học</span>
-              <span>{MOCK_LESSON.progress}%</span>
+              <span>{lessonData.progress}%</span>
             </div>
             <div className="h-5 w-full overflow-hidden rounded-full border-3 border-black bg-slate-100">
-              <div className="h-full border-r-3 border-black bg-primary" style={{ width: `${MOCK_LESSON.progress}%` }} />
+              <div className="h-full border-r-3 border-black bg-primary transition-all duration-1000" style={{ width: `${lessonData.progress}%` }} />
             </div>
           </div>
 

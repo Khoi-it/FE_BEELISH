@@ -4,9 +4,12 @@ interface UserData {
     id: string;
     name: string;
     email: string;
-    fullName: string | null;
+    fulltName: string | null;
     avatar: string | null;
     roleId?: string;
+    beginStreak?: string | null;
+    endStreak?: string | null;
+    level?: string | null;
     totalXP?: number;
 }
 

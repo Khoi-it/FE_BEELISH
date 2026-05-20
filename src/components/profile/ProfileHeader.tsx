@@ -2,7 +2,7 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export default function ProfileHeader({ onEditClick }: { onEditClick: () => void }) {
     const { user, logout } = useAuth();
-    const displayName = user?.fullName || user?.name || 'Học viên Beelish';
+    const displayName = user?.fulltName || user?.name || 'Học viên Beelish';
 
     return (
         <section className="relative flex flex-col gap-8 overflow-hidden rounded-[2rem] border-4 border-[#283f3b] bg-white p-8 shadow-[8px_8px_0px_0px_#283f3b] md:flex-row md:items-center">
@@ -33,7 +33,7 @@ export default function ProfileHeader({ onEditClick }: { onEditClick: () => void
                 </div>
 
                 <p className="pt-1 text-xl font-bold italic underline decoration-[#ffbf00] decoration-4">
-                    TRUNG CẤP - B2
+                    {user?.level || 'CHƯA XÁC ĐỊNH'}
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-4 pt-4 md:justify-start">

@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { getProfileStats } from '../../api/profileApi';
+
 interface StatCardProps {
     label: string;
     value: string | number;
@@ -26,9 +29,34 @@ function StatCard({ label, value, accentClassName, subValue, subValueClassName }
 }
 
 export default function ProfileStats() {
+    const [stats, setStats] = useState<StatCardProps[]>(MOCK_STATS);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const data = await getProfileStats();
+                // Giả định API trả về đúng format mảng StatCardProps, nếu không cần map lại dữ liệu
+                if (data && data.length > 0) {
+                    setStats(data);
+                }
+            } catch (error) {
+                console.warn("Dùng mock data do API ProfileStats chưa sẵn sàng:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchStats();
+    }, []);
+
+    if (isLoading) {
+        return <div className="p-8 text-center font-bold text-xl opacity-50">Đang tải thống kê...</div>;
+    }
+
     return (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-            {MOCK_STATS.map((stat, idx) => (
+            {stats.map((stat, idx) => (
                 <StatCard key={idx} {...stat} />
             ))}
         </div>

@@ -1,19 +1,19 @@
 import { useState } from 'react'
-import { MOCK_WORDS } from '../../constants/mockWords'
 
 interface ClozeViewProps {
   deckTitle: string;
+  words: any[];
   onBack: () => void;
 }
 
-export default function ClozeView({ deckTitle, onBack }: ClozeViewProps) {
+export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) {
   const [index, setIndex] = useState(0)
   const [input, setInput] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
 
-  const card = MOCK_WORDS[index]
-  const total = MOCK_WORDS.length
+  const card = words[index]
+  const total = words.length
   const done = index >= total
 
   const clozeRegex = new RegExp(card?.word, 'i')

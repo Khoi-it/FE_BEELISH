@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { getStudyHistory } from '../../api/profileApi';
+
 interface HistoryRowProps {
     icon: string;
     iconBgClass?: string;
@@ -32,14 +35,35 @@ function HistoryRow({ icon, iconBgClass, title, subtitle, xp, hasDashed = true }
 }
 
 export default function StudyHistory() {
+    const [history, setHistory] = useState<HistoryRowProps[]>(MOCK_HISTORY);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                const data = await getStudyHistory();
+                if (data && data.length > 0) {
+                    setHistory(data);
+                }
+            } catch (error) {
+                console.warn("Dùng mock data do API StudyHistory chưa sẵn sàng:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchHistory();
+    }, []);
+
     return (
         <div className="flex flex-col rounded-[1.5rem] border-4 border-[#283f3b] bg-white shadow-[4px_4px_0px_0px_#283f3b]">
-            <div className="border-b-4 border-[#283f3b] p-6">
+            <div className="border-b-4 border-[#283f3b] p-6 flex justify-between items-center">
                 <h2 className="text-xl font-black uppercase tracking-tight">Lịch sử học tập</h2>
+                {isLoading && <span className="text-xs font-bold opacity-50">Đang tải...</span>}
             </div>
 
             <div className="space-y-4 overflow-y-auto p-4 max-h-[300px]">
-                {MOCK_HISTORY.map((item, idx) => (
+                {history.map((item, idx) => (
                     <HistoryRow key={idx} {...item} />
                 ))}
             </div>

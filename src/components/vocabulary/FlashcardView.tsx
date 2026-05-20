@@ -1,18 +1,18 @@
 import { useState } from 'react'
-import { MOCK_WORDS } from '../../constants/mockWords'
 
 interface FlashcardViewProps {
   deckTitle: string;
+  words: any[];
   onBack: () => void;
 }
 
-export default function FlashcardView({ deckTitle, onBack }: FlashcardViewProps) {
+export default function FlashcardView({ deckTitle, words, onBack }: FlashcardViewProps) {
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [results, setResults] = useState<('known' | 'unknown')[]>([])
 
-  const card = MOCK_WORDS[index]
-  const total = MOCK_WORDS.length
+  const card = words[index]
+  const total = words.length
   const done = results.length
 
   function handleAnswer(known: boolean) {
