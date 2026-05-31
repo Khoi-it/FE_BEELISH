@@ -1,13 +1,34 @@
-const MOCK_HONEYCOMB = {
-  stats: {
-    title: "TUYỆT VỜI!",
-    description: "Bạn đã chăm chỉ hơn 85% học viên khác."
-  },
-  row1: [true, true, true, false, true, true, true, false, true, true, true, true, true, true, false, true, true, false, true, true, true, false, true, true, true],
-  row2: [true, true, false, true, true, true, true, false, true, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true]
-};
+interface HoneycombProps {
+  checkinHistory?: string[];
+}
 
-export default function HoneycombActivityCard() {
+export default function HoneycombActivityCard({ checkinHistory = [] }: HoneycombProps) {
+  // Sinh ra mảng 30 ngày gần nhất
+  const today = new Date();
+  const last30Days = Array.from({ length: 30 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(today.getDate() - (29 - i));
+    return d.toISOString().split('T')[0];
+  });
+
+  // Chuyển đổi lịch sử điểm danh thành Set ngày cho dễ tìm kiếm
+  const activeDays = new Set(
+    checkinHistory.map((dateStr) => {
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    })
+  );
+
+  // Map 30 ngày thành mảng boolean (đã học hay chưa)
+  const cells = last30Days.map(day => activeDays.has(day));
+
+  // Tách thành 2 hàng (mỗi hàng 15 ô)
+  const row1 = cells.slice(0, 15);
+  const row2 = cells.slice(15, 30);
+
+  const activeCount = cells.filter(c => c).length;
+  const percentage = Math.round((activeCount / 30) * 100);
+
   return (
     <div className="col-span-12 chunky-card bg-white p-8">
       <div className="mb-8 flex items-center justify-between">
@@ -28,23 +49,23 @@ export default function HoneycombActivityCard() {
           <div className="flex flex-wrap gap-4 justify-between">
             <div className="flex flex-col gap-6">
               <div className="flex flex-wrap gap-2 max-w-4xl">
-                {MOCK_HONEYCOMB.row1.map((isFilled, idx) => (
-                  <div key={`r1-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} />
+                {row1.map((isFilled, idx) => (
+                  <div key={`r1-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} title={last30Days[idx]} />
                 ))}
               </div>
 
               <div className="flex flex-wrap gap-2 max-w-4xl ml-4">
-                {MOCK_HONEYCOMB.row2.map((isFilled, idx) => (
-                  <div key={`r2-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} />
+                {row2.map((isFilled, idx) => (
+                  <div key={`r2-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} title={last30Days[idx + 15]} />
                 ))}
               </div>
             </div>
 
             <div className="max-w-[200px] rounded-2xl border-3 border-dashed border-black bg-primary/20 p-6 text-center flex flex-col items-center justify-center">
               <span className="material-symbols-outlined mb-2 fill-1 text-4xl text-primary">hive</span>
-              <h4 className="text-lg font-black">{MOCK_HONEYCOMB.stats.title}</h4>
+              <h4 className="text-lg font-black">{activeCount >= 15 ? 'TUYỆT VỜI!' : 'CỐ GẮNG LÊN!'}</h4>
               <p className="leading-tight text-xs font-bold">
-                {MOCK_HONEYCOMB.stats.description}
+                Bạn đã duy trì học được {activeCount}/30 ngày qua ({percentage}%).
               </p>
             </div>
           </div>
@@ -60,7 +81,7 @@ export default function HoneycombActivityCard() {
           <div className="hexagon filled h-5 w-4" />
           <span>Đã học</span>
         </div>
-        <div className="ml-auto">Cập nhật: 10 phút trước</div>
+        <div className="ml-auto">Cập nhật: Mới nhất</div>
       </div>
     </div>
   )

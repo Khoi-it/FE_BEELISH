@@ -4,7 +4,7 @@ interface UserData {
     id: string;
     name: string;
     email: string;
-    fulltName: string | null;
+    fullName: string | null;
     avatar: string | null;
     roleId?: string;
     beginStreak?: string | null;
@@ -23,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserData | null>(() => {
+        // console.log(user);
         // Đoạn code này CHỈ CHẠY ĐÚNG 1 LẦN khi ứng dụng vừa khởi động
         try {
             const storedUser = localStorage.getItem('user');

@@ -14,7 +14,7 @@ const navItems = [
 export default function AppHeader() {
     const {user} = useAuth();
     const [isLoggedIn, setIsLoggedIn] = useState(false)
-    const displayName = user?.fullName || user?.name || 'Khách';
+    const displayName = user?.name || 'Khách';
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
@@ -89,7 +89,7 @@ export default function AppHeader() {
                             <div
                                 className="w-8 h-8 md:w-9 md:h-9 bg-primary chunky-border rounded-full overflow-hidden">
                                 <img alt="User Avatar"
-                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrBnV9eaUmsAvRXjyA-O58_j6sfwLEcLfBUIhYJQR0swg5d4iRDvoLDcdU3o3IX_LoZ_XH5s-czzfDlSDUWSQgW_zmv4jWbHnkx6eWiqNls0tWCWC1ih1witgKDv-Pe8ZygeVydQTvaR1PenEF6O7mbB-jGrkHOXYJ0IRM5BUafpjIUfIRxxfbxbAC06luKhnAKbBTnn9TX6kwkI-1Ek2-GaOhROkOGfaG_bBxLc0s-qEi98mZiewbUKO1thStfRXS69maZVg26c4"/>
+                                     src={user?.avatar|| 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}/>
                             </div>
                         </Link>
                     </>

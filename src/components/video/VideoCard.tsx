@@ -7,9 +7,12 @@ export default function VideoCard({
   levelLabel,
   levelClassName,
   title,
-  views,
-  timeAgo,
+  viewCount,
+  upload_date,
 }) {
+  const timeAgo = new Date().getTime() - new Date(upload_date).getTime() < 24 * 60 * 60 * 1000
+    ? `${Math.floor((new Date().getTime() - new Date(upload_date).getTime()) / (60 * 60 * 1000))} giờ trước`
+    : `${Math.floor((new Date().getTime() - new Date(upload_date).getTime()) / (24 * 60 * 60 * 1000))} ngày trước`;
   return (
     <Link
       to={ROUTES.DICTATION}
@@ -33,7 +36,7 @@ export default function VideoCard({
           {title}
         </h3>
         <div className="mt-auto flex items-center justify-between opacity-60 text-xs font-bold">
-          <span>{views}</span>
+          <span>{viewCount}</span>
           <span>{timeAgo}</span>
         </div>
       </div>

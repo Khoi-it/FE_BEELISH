@@ -1,17 +1,23 @@
-
 export const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
-    // Sửa lỗi ESLint: Dùng const vì biến này không bị gán lại
     const accessToken = localStorage.getItem('accessToken');
 
-    // Khởi tạo headers với kiểu Record để TypeScript không phàn nàn
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    };
+    // 1. Khởi tạo object headers trống
+    const headers: Record<string, string> = {};
 
-    // Nếu lúc gọi hàm có truyền thêm headers (ví dụ multipart/form-data), thì gộp nó vào
+    // 2. Chỉ thêm 'application/json' nếu body KHÔNG phải là FormData
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    // 3. Nếu lúc gọi hàm có truyền thêm headers thì gộp nó vào
     if (options.headers) {
-        // Ép kiểu options.headers về any để clone các thuộc tính dễ dàng hơn
         Object.assign(headers, options.headers as any);
+    }
+
+    // 4. Kiểm tra an toàn: Nếu là FormData thì bắt buộc xóa Content-Type
+    // Việc này giúp trình duyệt tự điền Content-Type kèm chuỗi boundary chính xác
+    if (options.body instanceof FormData) {
+        delete headers['Content-Type'];
     }
 
     if (accessToken) {
@@ -21,8 +27,8 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
     // Thực hiện request lần 1
     let response = await fetch(url, { ...options, headers });
 
-    // Kiểm tra lỗi 401
-    if (response.status === 401) {
+    // Kiểm tra lỗi 401 hoặc 403 (do cấu hình Security đôi khi trả về 403 khi hết hạn token)
+    if (response.status === 401 || response.status === 403) {
         console.log("Access Token hết hạn! Đang gọi Refresh Token...");
 
         const refreshToken = localStorage.getItem('refreshToken');
@@ -63,7 +69,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
         } catch (error) {
             console.error("Lỗi khi refresh token:", error);
             forceLogout();
-            throw error; // Bắn lỗi ra cho UI xử lý
+            throw error; 
         }
     }
 

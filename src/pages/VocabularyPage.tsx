@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 import AppHeader from '../components/layout/AppHeader.jsx'
 import { MOCK_WORDS } from '../constants/mockWords'
 import FlashcardView from '../components/vocabulary/FlashcardView'
@@ -14,12 +15,13 @@ const MOCK_USER_DECKS = [
 
 const MOCK_SYSTEM_DECKS = [
   { id: 's1', icon: "auto_stories", title: "IELTS Level 1", wordCount: 500, progress: 0, iconWrapClass: "bg-secondary-container", barClass: "bg-secondary-container" },
-  { id: 's2', icon: "school", title: "TOEIC 650+", wordCount: 850, progress: 45, iconWrapClass: "bg-primary", barClass: "bg-primary" },
-  { id: 's3', icon: "travel_explore", title: "Travel Phrases", wordCount: 200, progress: 90, iconWrapClass: "bg-tertiary-container", barClass: "bg-tertiary-container" }
+  { id: 's2', icon: "school", title: "TOEIC 650+", wordCount: 850, progress: 0, iconWrapClass: "bg-primary", barClass: "bg-primary" },
+  { id: 's3', icon: "travel_explore", title: "Travel Phrases", wordCount: 200, progress: 0, iconWrapClass: "bg-tertiary-container", barClass: "bg-tertiary-container" }
 ];
 
 export default function VocabularyPage() {
-  const [userDecks, setUserDecks] = useState<any[]>(MOCK_USER_DECKS)
+  const { user } = useAuth()
+  const [userDecks, setUserDecks] = useState<any[]>([])
   const [systemDecks, setSystemDecks] = useState<any[]>(MOCK_SYSTEM_DECKS)
   const [selectedDeck, setSelectedDeck] = useState<any | null>(null)
   const [words, setWords] = useState<any[]>(MOCK_WORDS)
@@ -42,11 +44,20 @@ export default function VocabularyPage() {
 
   useEffect(() => {
     const fetchDecks = async () => {
-      try {
-        const uDecks = await getUserVocabSets();
-        if (uDecks && uDecks.length) setUserDecks(uDecks);
-      } catch (err) {
-        console.warn('Dùng mock data (User Decks):', err);
+      if (user) {
+        try {
+          const uDecks = await getUserVocabSets();
+          // Kiểm tra xem dữ liệu trả về có bị lỗi format (ví dụ trả về object chứa mảng thay vì mảng trực tiếp)
+          const actualDecks = Array.isArray(uDecks) ? uDecks : (uDecks.data || []);
+          if (actualDecks && actualDecks.length > 0) {
+            setUserDecks(actualDecks);
+          } else {
+            setUserDecks([]);
+          }
+        } catch (err) {
+          console.warn('Lỗi lấy User Decks:', err);
+          setUserDecks([]);
+        }
       }
 
       try {
@@ -108,25 +119,33 @@ export default function VocabularyPage() {
           <>
             {!selectedDeck ? (
               <div className="space-y-12 py-2 md:py-4">
-                <section>
-                  <div className="mb-6 flex flex-wrap items-center gap-4">
-                    <h2 className="font-headline text-4xl font-black uppercase italic tracking-tighter underline">
-                      Bộ từ cá nhân
-                    </h2>
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 border-4 border-secondary bg-tertiary px-4 py-2 font-black uppercase text-on-tertiary brutalist-shadow brutalist-shadow-hover"
-                    >
-                      <span className="material-symbols-outlined">add_circle</span>
-                      Tạo mới
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {userDecks.map((deck, i) => (
-                      <DeckCard key={i} {...deck} onSelect={() => setSelectedDeck(deck)} />
-                    ))}
-                  </div>
-                </section>
+                {user && (
+                  <section>
+                    <div className="mb-6 flex flex-wrap items-center gap-4">
+                      <h2 className="font-headline text-4xl font-black uppercase italic tracking-tighter underline">
+                        Bộ từ cá nhân
+                      </h2>
+                      <button
+                        type="button"
+                        className="flex items-center gap-2 border-4 border-secondary bg-tertiary px-4 py-2 font-black uppercase text-on-tertiary brutalist-shadow brutalist-shadow-hover"
+                      >
+                        <span className="material-symbols-outlined">add_circle</span>
+                        Tạo mới
+                      </button>
+                    </div>
+                    {userDecks.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {userDecks.map((deck, i) => (
+                          <DeckCard key={i} {...deck} onSelect={() => setSelectedDeck(deck)} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center border-4 border-dashed border-secondary/30 rounded-xl bg-surface">
+                        <p className="font-bold text-lg text-secondary/70">Bạn chưa có bộ từ cá nhân nào. Nhấn "Tạo mới" để bắt đầu nhé!</p>
+                      </div>
+                    )}
+                  </section>
+                )}
 
                 <section>
                   <div className="mb-6 flex flex-wrap items-center gap-4">

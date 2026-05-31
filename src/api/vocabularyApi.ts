@@ -10,8 +10,11 @@ export const getUserVocabSets = async () => {
 };
 
 export const getSystemVocabSets = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}`, {
-        method: 'GET'
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     });
     if (!response.ok) throw new Error('Failed to fetch system vocab sets');
     return response.json();
