@@ -8,7 +8,7 @@ interface DeckCardProps {
   onSelect: () => void;
 }
 
-export default function DeckCard({ icon, title, wordCount, progress, barClass, iconWrapClass, onSelect }: DeckCardProps) {
+export default function DeckCard({ icon, title, wordCount, progress = 0, barClass, iconWrapClass, onSelect }: DeckCardProps) {
   return (
     <div
       role="button"

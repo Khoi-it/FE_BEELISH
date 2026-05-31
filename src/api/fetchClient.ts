@@ -21,8 +21,8 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
     // Thực hiện request lần 1
     let response = await fetch(url, { ...options, headers });
 
-    // Kiểm tra lỗi 401
-    if (response.status === 401) {
+    // Kiểm tra lỗi 401 hoặc 403 (do cấu hình Security đôi khi trả về 403 khi hết hạn token)
+    if (response.status === 401 || response.status === 403) {
         console.log("Access Token hết hạn! Đang gọi Refresh Token...");
 
         const refreshToken = localStorage.getItem('refreshToken');

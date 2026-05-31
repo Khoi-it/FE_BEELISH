@@ -50,6 +50,9 @@ export default function LoginPage() {
 
             setMessage({type: 'success', text: 'Đăng nhập thành công!'})
             setUser(result.data.user);
+            if (result.data.user) {
+                localStorage.setItem('user', JSON.stringify(result.data.user));
+            }
 
             // Xóa form
             setUsername('')
