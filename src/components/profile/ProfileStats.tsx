@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getProfileStats } from '../../api/profileApi';
+import {getStats} from '../../api/userApi';
 
 interface StatCardProps {
     label: string;
@@ -35,10 +35,41 @@ export default function ProfileStats() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const data = await getProfileStats();
-                // Giả định API trả về đúng format mảng StatCardProps, nếu không cần map lại dữ liệu
-                if (data && data.length > 0) {
-                    setStats(data);
+                // Lấy data thô từ API
+                const response = await getStats(); 
+                const data= response.data; // Giả sử API trả về { wordsLearned, wordsToday, streakDays, bestStreak, totalXp, currentLevel, leaderboardRank, leagueName }
+                
+                if (data) {
+                    // MAPPING DATA: Chuyển đổi data API sang mảng StatCardProps
+                    const mappedStats: StatCardProps[] = [
+                        { 
+                            label: "Số từ đã học", 
+                            // Dùng toLocaleString() để format số (vd: 1240 -> 1,240)
+                            value: data.totalLearnedWords.toLocaleString(), 
+                            subValue: `+${data.totalWordToday} hôm nay`, 
+                            subValueClassName: "text-tertiary" 
+                        },
+                        { 
+                            label: "Ngày học liên tiếp", 
+                            value: data.currentStreak, 
+                            accentClassName: "text-[#FF9F1C]", 
+                            subValue: `Kỷ lục: ${data.longestStreak} ngày` 
+                        },
+                        { 
+                            label: "Tổng XP", 
+                            value: data.totalXp.toLocaleString(), 
+                            subValue: `Level ${data.level}`, 
+                            subValueClassName: "text-[#ffbf00]" 
+                        },
+                        { 
+                            label: "Thứ hạng", 
+                            value: `#${data.rank}`, 
+                            subValue: data.rank 
+                        }
+                    ];
+
+                    // Cập nhật state với dữ liệu đã map
+                    setStats(mappedStats);
                 }
             } catch (error) {
                 console.warn("Dùng mock data do API ProfileStats chưa sẵn sàng:", error);

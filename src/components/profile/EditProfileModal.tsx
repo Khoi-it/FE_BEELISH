@@ -1,16 +1,60 @@
 import { useState } from 'react';
 import { useAuth } from "../../contexts/AuthContext";
+import { updateUser, updateImageUser } from '../../api/userApi'; 
 
 export default function EditProfileModal({ onClose }: { onClose: () => void }) {
     const { user } = useAuth();
     const [email, setEmail] = useState(user?.email || '');
-    const [fulltName, setFulltName] = useState(user?.fulltName || user?.name || '');
+    const [fulltName, setFulltName] = useState(user?.fullName || user?.name || '');
     const [level, setLevel] = useState(user?.level || '');
+    
+    // State lưu URL ảo để hiển thị
+    const [avatar, setAvatar] = useState(user?.avatar || '');
+    
+    // State mới: Lưu trữ file ảnh thật để gửi lên BE
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleSave = () => {
-        // Thực hiện lưu API ở đây (ví dụ: gọi updateUserProfile)
-        // ...
-        onClose();
+        updateUser({ name: fulltName, email, level })
+            .then(() => {
+                alert('Cập nhật hồ sơ thành công!');
+                onClose();
+            })
+            .catch((error) => {
+                console.error('Error updating profile:', error);
+                alert('Có lỗi xảy ra khi cập nhật hồ sơ. Vui lòng thử lại.');
+            });
+    };
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]; 
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setAvatar(previewUrl);
+            setSelectedFile(file); // Lưu lại file khi người dùng chọn
+        }
+    };
+
+    // Hàm xử lý khi ấn nút "Xác nhận" ảnh
+    const handleConfirmAvatar = async () => {
+        if (!selectedFile) return;
+
+        setIsUploading(true);
+        try {
+           
+            // Gọi API upload
+            await updateImageUser(selectedFile);
+            
+            alert('Cập nhật ảnh đại diện thành công!');
+            setSelectedFile(null); // Reset file để ẩn nút "Xác nhận"
+            
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            alert('Có lỗi khi tải ảnh lên. Vui lòng thử lại.');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -22,28 +66,45 @@ export default function EditProfileModal({ onClose }: { onClose: () => void }) {
 
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 -mr-2">
                     <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 overflow-hidden rounded-full border-4 border-[#283f3b] bg-white shadow-[2px_2px_0px_0px_#283f3b] shrink-0">
+                        <div className="h-16 w-16 overflow-hidden shrink-0 rounded-full border-4 border-[#283f3b] bg-white shadow-[2px_2px_0px_0px_#283f3b]">
                             <img
                                 alt="Current Avatar"
                                 className="h-full w-full object-cover"
-                                src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuDMBC2iyhNzwKbtQW0LNx7-rHsVPKPmFcj1tNWZntgSIeshoSJ3j8tL7857mMnQp8bn3KoZtZr_Fw8fxnpf3QBZg9q6xNgsVvwRvSiAl81jj1Lef9sEQU5qEttcnrsZUOiMgEMtwreYCAM0cq0J_S4Wgd-kV1XYSJd-08xDtlEAda9oXEJkaILVnRcNzuATzfuy-Nt96n27rXFmPEGh-I7R67xCjF_VUnkaw-KPTzTvWIanI2A8pQ5Fn7EVJFlK698-3U9j6VzXHV4"}
+                                src={avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuDMBC2iyhNzwKbtQW0LNx7-rHsVPKPmFcj1tNWZntgSIeshoSJ3j8tL7857mMnQp8bn3KoZtZr_Fw8fxnpf3QBZg9q6xNgsVvwRvSiAl81jj1Lef9sEQU5qEttcnrsZUOiMgEMtwreYCAM0cq0J_S4Wgd-kV1XYSJd-08xDtlEAda9oXEJkaILVnRcNzuATzfuy-Nt96n27rXFmPEGh-I7R67xCjF_VUnkaw-KPTzTvWIanI2A8pQ5Fn7EVJFlK698-3U9j6VzXHV4"}
                             />
                         </div>
                         <div className="flex-1">
                             <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">
                                 Ảnh đại diện
                             </label>
-                            <label className="inline-block cursor-pointer rounded-lg border-2 border-[#283f3b] bg-primary-container px-4 py-2 text-xs font-black uppercase shadow-[2px_2px_0px_0px_#283f3b] transition-all hover:brightness-95 active:translate-y-1 active:shadow-none">
-                                Thay đổi
-                                <input type="file" className="hidden" accept="image/*" />
-                            </label>
+                            <div className="flex gap-2">
+                                <label className="inline-block cursor-pointer rounded-lg border-2 border-[#283f3b] bg-primary-container px-4 py-2 text-xs font-black uppercase shadow-[2px_2px_0px_0px_#283f3b] transition-all hover:brightness-95 active:translate-y-1 active:shadow-none">
+                                    Thay đổi
+                                    <input 
+                                        type="file" 
+                                        className="hidden" 
+                                        accept="image/*"
+                                        onChange={handleAvatarChange} 
+                                    />
+                                </label>
+
+                                {/* Chỉ hiển thị nút Xác nhận khi có file được chọn */}
+                                {selectedFile && (
+                                    <button 
+                                        onClick={handleConfirmAvatar}
+                                        disabled={isUploading}
+                                        className="inline-block cursor-pointer rounded-lg border-2 border-[#283f3b] bg-[#ffbf00] px-4 py-2 text-xs font-black uppercase shadow-[2px_2px_0px_0px_#283f3b] transition-all hover:brightness-95 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:active:translate-y-0"
+                                    >
+                                        {isUploading ? 'Đang tải...' : 'Xác nhận'}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
 
+                    {/* --- Các trường Input khác giữ nguyên --- */}
                     <div>
-                        <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">
-                            Email
-                        </label>
+                        <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">Email</label>
                         <input
                             type="email"
                             value={email}
@@ -54,9 +115,7 @@ export default function EditProfileModal({ onClose }: { onClose: () => void }) {
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">
-                            Họ và tên
-                        </label>
+                        <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">Họ và tên</label>
                         <input
                             type="text"
                             value={fulltName}
@@ -67,9 +126,7 @@ export default function EditProfileModal({ onClose }: { onClose: () => void }) {
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">
-                            Mục tiêu học tập (Level)
-                        </label>
+                        <label className="mb-2 block text-sm font-black uppercase text-[#283f3b]">Mục tiêu học tập (Level)</label>
                         <select
                             value={level}
                             onChange={(e) => setLevel(e.target.value)}
