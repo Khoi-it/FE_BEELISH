@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getStudyHistory } from '../../api/profileApi';
+import { getStudyHistory } from '../../api/userApi';
 
 interface HistoryRowProps {
     icon: string;
@@ -9,13 +9,6 @@ interface HistoryRowProps {
     xp: string;
     hasDashed?: boolean;
 }
-
-const MOCK_HISTORY: HistoryRowProps[] = [
-    { icon: "mic", iconBgClass: "bg-primary-container", title: "Dictation: Lesson 04", subtitle: "Completed • 2h ago", xp: "+45XP", hasDashed: true },
-    { icon: "style", iconBgClass: "bg-tertiary-container", title: "Flashcards: Daily Conv.", subtitle: "Reviewed • 5h ago", xp: "+20XP", hasDashed: true },
-    { icon: "play_circle", iconBgClass: "bg-secondary-container", title: "Video: Business Phrasal Verbs", subtitle: "Watched • Yesterday", xp: "+100XP", hasDashed: true },
-    { icon: "mic", iconBgClass: "bg-primary-container", title: "Dictation: Lesson 03", subtitle: "Completed • Yesterday", xp: "+50XP", hasDashed: false }
-];
 
 function HistoryRow({ icon, iconBgClass, title, subtitle, xp, hasDashed = true }: HistoryRowProps) {
     return (
@@ -29,24 +22,76 @@ function HistoryRow({ icon, iconBgClass, title, subtitle, xp, hasDashed = true }
                 <div className="text-[10px] font-bold opacity-60">{subtitle}</div>
             </div>
 
-            <div className="text-xs font-black">{xp}</div>
+            <div className="text-xs font-black text-[#FF9F1C]">{xp}</div>
         </div>
     )
 }
 
+// 1. Cập nhật interface theo đúng cấu trúc JSON mới trả về
+interface VocabSet {
+    vocabId: string;
+    vocabName: string;
+    numMemorizeNew: number;
+    xpNew: number;
+    updatedAt: string | null;
+}
+
+interface ApiHistoryDailyItem {
+    id: string;
+    date: string; // VD: "2026-05-31"
+    totalNumMemorizeNew: number;
+    totalXpNew: number;
+    updatedAt: string; // VD: "2026-05-31T16:53:22.43"
+    vocabSets: VocabSet[];
+}
+
 export default function StudyHistory() {
-    const [history, setHistory] = useState<HistoryRowProps[]>(MOCK_HISTORY);
+    const [history, setHistory] = useState<HistoryRowProps[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const data = await getStudyHistory();
-                if (data && data.length > 0) {
-                    setHistory(data);
+                const response = await getStudyHistory();
+                
+                if (response?.statusCode === 200 && response?.data?.content) {
+                    const contentList: ApiHistoryDailyItem[] = response.data.content;
+                    
+                    if (contentList.length === 0) {
+                        setHistory([]);
+                        return;
+                    }
+
+                    // 2. Map dữ liệu lịch sử theo từng ngày
+                    const mappedHistory = contentList.map((item, index) => {
+                        // Format lại ngày để hiển thị (từ chuỗi "2026-05-31" hoặc "updatedAt")
+                        const dateObj = new Date(item.updatedAt || item.date);
+                        const formattedDate = dateObj.toLocaleDateString('vi-VN', {
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric'
+                        });
+
+                        // Lấy giờ phút nếu muốn hiển thị chi tiết (VD: 16:53)
+                        const formattedTime = dateObj.toLocaleTimeString('vi-VN', {
+                            hour: '2-digit', 
+                            minute: '2-digit'
+                        });
+
+                        return {
+                            icon: "style", // Dùng icon bộ thẻ (flashcards) hoặc "text_fields"
+                            iconBgClass: "bg-tertiary-container", 
+                            title: `Luyện tập từ vựng`, // Tên chung cho bài học trong ngày
+                            subtitle: `Học ${item.totalNumMemorizeNew} từ mới • ${formattedTime} ngày ${formattedDate}`, 
+                            xp: `+${item.totalXpNew}XP`,
+                            hasDashed: index < contentList.length - 1 
+                        };
+                    });
+
+                    setHistory(mappedHistory);
                 }
             } catch (error) {
-                console.warn("Dùng mock data do API StudyHistory chưa sẵn sàng:", error);
+                console.error("Lỗi khi gọi API Lịch sử học tập:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -63,14 +108,22 @@ export default function StudyHistory() {
             </div>
 
             <div className="space-y-4 overflow-y-auto p-4 max-h-[300px]">
-                {history.map((item, idx) => (
-                    <HistoryRow key={idx} {...item} />
-                ))}
+                {!isLoading && history.length === 0 ? (
+                    <div className="py-8 text-center text-sm font-bold opacity-50">
+                        Chưa có lịch sử học tập nào.
+                    </div>
+                ) : (
+                    history.map((item, idx) => (
+                        <HistoryRow key={idx} {...item} />
+                    ))
+                )}
             </div>
 
-            <button className="m-4 rounded-lg border-2 border-[#283f3b] px-2 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-zinc-50">
-                Xem tất cả
-            </button>
+            {history.length > 0 && (
+                <button className="m-4 rounded-lg border-2 border-[#283f3b] px-2 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-zinc-50">
+                    Xem tất cả
+                </button>
+            )}
         </div>
     );
 }

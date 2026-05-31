@@ -94,8 +94,8 @@ export default function VideoPage() {
     const fetchVideoList = async () => {
       try {
         const data = await getVideos();
-        // Fallback or map data if needed. 
-        // For now, assuming API returns array of objects with same schema
+        
+      
         if (data && data.length > 0) {
           setVideoList(data);
         }
