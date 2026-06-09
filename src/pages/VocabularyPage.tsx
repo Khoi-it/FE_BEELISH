@@ -9,14 +9,14 @@ import StudyModeModal from '../components/vocabulary/StudyModeModal'
 import { getUserVocabSets, getSystemVocabSets, getWordsByDeckId } from '../api/vocabularyApi'
 
 const MOCK_USER_DECKS = [
-  { id: 'u1', icon: "folder", title: "Daily Conversation", wordCount: 120, progress: 65, iconWrapClass: "bg-primary", barClass: "bg-primary" },
-  { id: 'u2', icon: "inventory_2", title: "Business English", wordCount: 45, progress: 12, iconWrapClass: "bg-tertiary", barClass: "bg-tertiary" },
+  { id: 'u1', icon: "folder", title: "Daily Conversation", wordCount: 120, progress: 65 },
+  { id: 'u2', icon: "inventory_2", title: "Business English", wordCount: 45, progress: 12 },
 ];
 
 const MOCK_SYSTEM_DECKS = [
-  { id: 's1', icon: "auto_stories", title: "IELTS Level 1", wordCount: 500, progress: 0, iconWrapClass: "bg-secondary-container", barClass: "bg-secondary-container" },
-  { id: 's2', icon: "school", title: "TOEIC 650+", wordCount: 850, progress: 0, iconWrapClass: "bg-primary", barClass: "bg-primary" },
-  { id: 's3', icon: "travel_explore", title: "Travel Phrases", wordCount: 200, progress: 0, iconWrapClass: "bg-tertiary-container", barClass: "bg-tertiary-container" }
+  { id: 's1', icon: "auto_stories", title: "IELTS Level 1", wordCount: 500, progress: 0 },
+  { id: 's2', icon: "school", title: "TOEIC 650+", wordCount: 850, progress: 0 },
+  { id: 's3', icon: "travel_explore", title: "Travel Phrases", wordCount: 200, progress: 0 }
 ];
 
 export default function VocabularyPage() {
@@ -76,10 +76,10 @@ export default function VocabularyPage() {
       setIsLoadingWords(true);
       try {
         const data = await getWordsByDeckId(selectedDeck.id || 1);
-        if (data && data.length) {
+        if (data && Array.isArray(data)) {
           setWords(data);
         } else {
-          setWords(MOCK_WORDS);
+          setWords([]);
         }
       } catch (err) {
         console.warn('Dùng mock data (Words):', err);
@@ -210,8 +210,8 @@ export default function VocabularyPage() {
                             <td className="px-4 py-4">
                               <span className="rounded-full border-2 border-secondary px-3 py-0.5 text-xs font-black uppercase">{w.type || 'N/A'}</span>
                             </td>
-                            <td className="px-6 py-4 font-bold">{w.def}</td>
-                            <td className="px-6 py-4 text-sm italic opacity-70">"{w.ex}"</td>
+                            <td className="px-6 py-4 font-bold">{w.def || w.mean}</td>
+                            <td className="px-6 py-4 text-sm italic opacity-70">"{w.ex || w.example}"</td>
                             <td className="px-6 py-4 text-center">
                               {w.learned ? (
                                 <span className="material-symbols-outlined text-2xl text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>

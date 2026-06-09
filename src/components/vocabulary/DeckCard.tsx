@@ -3,12 +3,22 @@ interface DeckCardProps {
   title: string;
   wordCount: number;
   progress: number;
-  barClass: string;
-  iconWrapClass: string;
   onSelect: () => void;
 }
 
-export default function DeckCard({ icon, title, wordCount, progress = 0, barClass, iconWrapClass, onSelect }: DeckCardProps) {
+const ICON_STYLES: Record<string, { wrap: string, bar: string }> = {
+  folder: { wrap: "bg-primary", bar: "bg-primary" },
+  inventory_2: { wrap: "bg-tertiary", bar: "bg-tertiary" },
+  auto_stories: { wrap: "bg-secondary-container", bar: "bg-secondary-container" },
+  school: { wrap: "bg-primary", bar: "bg-primary" },
+  travel_explore: { wrap: "bg-tertiary-container", bar: "bg-tertiary-container" },
+};
+const DEFAULT_STYLE = { wrap: "bg-secondary-container", bar: "bg-secondary-container" };
+
+export default function DeckCard({ icon, title, wordCount, progress = 0, onSelect }: DeckCardProps) {
+  const styles = ICON_STYLES[icon] || DEFAULT_STYLE;
+  const iconWrapClass = styles.wrap;
+  const barClass = styles.bar;
   return (
     <div
       role="button"
