@@ -6,7 +6,7 @@ import {ROUTES} from '../../constants/routes'
 import {useAuth} from "../../contexts/AuthContext.tsx";
 
 const navItems = [
-    {label: 'Trang chủ', route: ROUTES.HOME},
+    {label: 'Tổng quan', route: ROUTES.HOME},
     {label: 'Từ vựng', route: ROUTES.VOCABULARY},
     {label: 'Video', route: ROUTES.VIDEO},
 ]
@@ -37,7 +37,9 @@ export default function AppHeader() {
                     </div>
                 </Link>
                 <nav className="hidden md:flex gap-2 items-center">
-                    {navItems.map(({label, route}) => (
+                    {navItems
+                        .filter(item => item.route === ROUTES.HOME ? isLoggedIn : true)
+                        .map(({label, route}) => (
                         <Link key={route} to={route}
                               className="px-3 py-1.5 text-sm font-bold hover:bg-primary/20 rounded-lg">
                             {label}
