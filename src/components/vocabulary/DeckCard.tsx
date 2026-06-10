@@ -15,7 +15,7 @@ const ICON_STYLES: Record<string, { wrap: string, bar: string }> = {
 };
 const DEFAULT_STYLE = { wrap: "bg-secondary-container", bar: "bg-secondary-container" };
 
-export default function DeckCard({ icon, title, wordCount, progress = 0, onSelect }: DeckCardProps) {
+export default function DeckCard({ icon, title, wordCount, progress, onSelect }: DeckCardProps) {
   const styles = ICON_STYLES[icon] || DEFAULT_STYLE;
   const iconWrapClass = styles.wrap;
   const barClass = styles.bar;

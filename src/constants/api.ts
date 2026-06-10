@@ -10,4 +10,5 @@ export const API_ENDPOINTS = {
   USER_VOCAB_SETS: '/api/user-vocab-sets',
   VOCAB_SETS: '/api/vocab-sets',
   WORDS: '/api/words',
+  CATEGORIES: '/api/categories',
 };

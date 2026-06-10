@@ -27,3 +27,14 @@ export const getWordsByDeckId = async (setId: string | number) => {
     if (!response.ok) throw new Error('Failed to fetch words');
     return response.json();
 };
+
+export const getCategories = async () => {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CATEGORIES}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) throw new Error('Failed to fetch categories');
+    return response.json();
+};
