@@ -38,3 +38,12 @@ export const getCategories = async () => {
     if (!response.ok) throw new Error('Failed to fetch categories');
     return response.json();
 };
+
+export const recordStudySession = async (vocabId: string, newWords: number, xpGained: number, progress: number, memoryWords: string[], clozeWords: string[]) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.USER_VOCAB_SETS}/study-session`, {
+        method: 'POST',
+        body: JSON.stringify({ vocabId, newWords, xpGained, progress, memoryWords, clozeWords })
+    });
+    if (!response.ok) throw new Error('Failed to record study session');
+    return response.json();
+};

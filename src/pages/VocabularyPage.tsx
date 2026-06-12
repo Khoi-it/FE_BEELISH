@@ -5,7 +5,7 @@ import FlashcardView from '../components/vocabulary/FlashcardView'
 import ClozeView from '../components/vocabulary/ClozeView'
 import DeckCard from '../components/vocabulary/DeckCard'
 import StudyModeModal from '../components/vocabulary/StudyModeModal'
-import {getUserVocabSets, getSystemVocabSets, getWordsByDeckId, getCategories} from '../api/vocabularyApi'
+import {getUserVocabSets, getSystemVocabSets, getWordsByDeckId, getCategories, recordStudySession} from '../api/vocabularyApi'
 
 interface Category {
     id: number;
@@ -20,16 +20,20 @@ interface Deck {
     numOfWords?: number;
     learningProgress?: number;
     categoryID?: number;
+    memoryWords?: string[];
+    clozeWords?: string[];
 }
 
 interface Word {
+    id?: string;
     word: string;
     type?: string;
     mean?: string;
     def?: string;
     example?: string;
     ex?: string;
-    learned?: boolean;
+    isMemorized?: boolean;
+    isClozeCorrect?: boolean;
 }
 
 export default function VocabularyPage() {
@@ -56,15 +60,44 @@ export default function VocabularyPage() {
         setStudyMode(null)
     }
 
+    const handleStudyComplete = async (newWords: number, xpGained: number) => {
+        if (!selectedDeck || !studyMode || words.length === 0) return;
+        const targetVocabId = String(selectedDeck.vocabID || selectedDeck.id || 1);
+        
+        try {
+            const currentMemoryWords = words.filter(w => w.isMemorized).map(w => w.id || w.word) as string[];
+            const currentClozeWords = words.filter(w => w.isClozeCorrect).map(w => w.id || w.word) as string[];
+            
+            const calculatedProgress = Math.round(((currentMemoryWords.length + currentClozeWords.length) / (words.length * 2)) * 100);
+            
+            const result = await recordStudySession(targetVocabId, newWords, xpGained, calculatedProgress, currentMemoryWords, currentClozeWords);
+            const newProgress = result.data?.learningProgress ?? Math.max(selectedDeck.learningProgress || 0, calculatedProgress);
+            
+            const updateDeck = (deck: Deck) => {
+                if (String(deck.vocabID) === targetVocabId || String(deck.id) === targetVocabId) {
+                    return { ...deck, learningProgress: newProgress, memoryWords: currentMemoryWords, clozeWords: currentClozeWords };
+                }
+                return deck;
+            };
+
+            setUserDecks(prev => prev.map(updateDeck));
+            setSystemDecks(prev => prev.map(updateDeck));
+            setSelectedDeck(prev => prev ? updateDeck(prev) : null);
+        } catch (err) {
+            console.error('Lỗi lưu phiên học:', err);
+        }
+    };
+
     useEffect(() => {
         const fetchDecks = async () => {
+            let actualSystemDecks: Deck[] = [];
+            
             try {
                 const sDecks = await getSystemVocabSets();
-                const actualSystemDecks = Array.isArray(sDecks) ? sDecks : (sDecks.data || []);
+                actualSystemDecks = Array.isArray(sDecks) ? sDecks : (sDecks.data || []);
                 setSystemDecks(actualSystemDecks);
             } catch (err) {
                 console.error('Lỗi lấy System Decks:', err);
-                setSystemDecks([]);
             }
 
             try {
@@ -73,14 +106,21 @@ export default function VocabularyPage() {
                 setCategories(actualCategories);
             } catch (err) {
                 console.error('Lỗi lấy Categories:', err);
-                setCategories([]);
             }
 
             if (user) {
                 try {
                     const uDecks = await getUserVocabSets();
                     const actualUserDecks = Array.isArray(uDecks) ? uDecks : (uDecks.data || []);
-                    setUserDecks(actualUserDecks);
+                    
+                    const systemDeckIds = new Set(actualSystemDecks.map(d => String(d.id)));
+                    const filteredUserDecks = actualUserDecks.filter(u => !systemDeckIds.has(String(u.vocabID)));
+                    setUserDecks(filteredUserDecks);
+
+                    setSystemDecks(actualSystemDecks.map(sDeck => {
+                        const userDeck = actualUserDecks.find(u => String(u.vocabID) === String(sDeck.id));
+                        return userDeck ? { ...sDeck, learningProgress: userDeck.learningProgress, memoryWords: userDeck.memoryWords } : sDeck;
+                    }));
                 } catch (err) {
                     console.error('Lỗi lấy User Decks:', err);
                     setUserDecks([]);
@@ -98,7 +138,14 @@ export default function VocabularyPage() {
                 const targetVocabId = selectedDeck.vocabID || selectedDeck.id || 1;
                 const data = await getWordsByDeckId(targetVocabId);
                 if (data && Array.isArray(data)) {
-                    setWords(data);
+                    const memoryWords = selectedDeck.memoryWords || [];
+                    const clozeWords = selectedDeck.clozeWords || [];
+                    const initializedWords = data.map(w => ({
+                        ...w,
+                        isMemorized: memoryWords.includes(w.id) || memoryWords.includes(w.word),
+                        isClozeCorrect: clozeWords.includes(w.id) || clozeWords.includes(w.word)
+                    }));
+                    setWords(initializedWords);
                 } else {
                     setWords([]);
                 }
@@ -128,11 +175,35 @@ export default function VocabularyPage() {
 
                 {/* ── Study mode views ── */}
                 {studyMode === 'flashcard' && selectedDeck && words.length > 0 && (
-                    <FlashcardView deckTitle={selectedDeck.title} words={words} onBack={exitStudy}/>
+                    <FlashcardView 
+                        deckTitle={selectedDeck.title} 
+                        words={words} 
+                        onBack={exitStudy}
+                        onUpdateWord={(index, value) => {
+                            setWords(prev => {
+                                const newWords = [...prev];
+                                newWords[index] = { ...newWords[index], isMemorized: value };
+                                return newWords;
+                            });
+                        }}
+                        onComplete={(newWords, xpGained) => handleStudyComplete(newWords, xpGained)}
+                    />
                 )}
 
                 {studyMode === 'cloze' && selectedDeck && words.length > 0 && (
-                    <ClozeView deckTitle={selectedDeck.title} words={words} onBack={exitStudy}/>
+                    <ClozeView 
+                        deckTitle={selectedDeck.title} 
+                        words={words} 
+                        onBack={exitStudy}
+                        onUpdateWord={(index, value) => {
+                            setWords(prev => {
+                                const newWords = [...prev];
+                                newWords[index] = { ...newWords[index], isClozeCorrect: value };
+                                return newWords;
+                            });
+                        }}
+                        onComplete={(newWords, xpGained) => handleStudyComplete(newWords, xpGained)}
+                    />
                 )}
 
                 {/* ── Normal views (deck list + word list) ── */}
@@ -263,7 +334,7 @@ export default function VocabularyPage() {
                                             {words.map((w, index) => (
                                                 <tr
                                                     key={index}
-                                                    className={`border-b-2 border-dashed border-secondary/30 transition-colors last:border-b-0 ${w.learned ? 'bg-primary/10' : 'hover:bg-surface-variant/50'}`}
+                                                    className={`border-b-2 border-dashed border-secondary/30 transition-colors last:border-b-0 ${w.isMemorized ? 'bg-primary/10' : 'hover:bg-surface-variant/50'}`}
                                                 >
                                                     <td className="px-6 py-4">
                                                         <span className="text-lg font-black uppercase">{w.word}</span>
@@ -275,7 +346,7 @@ export default function VocabularyPage() {
                                                     <td className="px-6 py-4 font-bold">{w.def || w.mean}</td>
                                                     <td className="px-6 py-4 text-sm italic opacity-70">"{w.ex || w.example}"</td>
                                                     <td className="px-6 py-4 text-center">
-                                                        {w.learned ? (
+                                                        {w.isMemorized ? (
                                                             <span
                                                                 className="material-symbols-outlined text-2xl text-tertiary"
                                                                 style={{fontVariationSettings: "'FILL' 1"}}>

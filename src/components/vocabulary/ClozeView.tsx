@@ -4,26 +4,37 @@ interface ClozeViewProps {
   deckTitle: string;
   words: any[];
   onBack: () => void;
+  onUpdateWord?: (index: number, learned: boolean) => void;
+  onComplete?: (newWords: number, xpGained: number) => void;
 }
 
-export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) {
+export default function ClozeView(props: ClozeViewProps) {
+  const { deckTitle, words, onBack } = props;
   const [index, setIndex] = useState(0)
   const [input, setInput] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
+  const [completed, setCompleted] = useState(false)
 
   const card = words[index]
   const total = words.length
   const done = index >= total
 
-  const clozeRegex = new RegExp(card?.word, 'i')
-  const clozeSentence = card ? card.ex.replace(clozeRegex, '_____') : ''
+  const clozeRegex = new RegExp(card?.word, 'gi')
+  const sentence = card ? (card.ex || card.example || '') : ''
+  const clozeSentence = sentence ? sentence.replace(clozeRegex, '_____') : ''
   const isCorrect = submitted && input.trim().toLowerCase() === card?.word.toLowerCase()
 
   function handleSubmit() {
     if (!input.trim()) return
     setSubmitted(true)
-    if (input.trim().toLowerCase() === card.word.toLowerCase()) setScore((s) => s + 1)
+    const correct = input.trim().toLowerCase() === card.word.toLowerCase()
+    if (correct) {
+      setScore((s) => s + 1)
+      if (props.onUpdateWord) props.onUpdateWord(index, true)
+    } else {
+      if (props.onUpdateWord) props.onUpdateWord(index, false)
+    }
   }
 
   function handleNext() {
@@ -32,7 +43,22 @@ export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) 
     setIndex((i) => i + 1)
   }
 
-  if (done) {
+  const finishSession = () => {
+    if (!completed) {
+      setCompleted(true)
+      const xpGained = score * 10
+      
+      if (props.onComplete && score > 0) {
+        props.onComplete(score, xpGained)
+      }
+    }
+  }
+
+  if (done && total > 0) {
+    finishSession()
+    
+    const xpGained = score * 10
+
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 py-12 text-center">
         <div className="rounded-full border-4 border-secondary bg-[#679436] p-6 shadow-[6px_6px_0px_0px_#283f3b]">
@@ -45,10 +71,13 @@ export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) 
           <p className="mt-3 text-xl font-bold opacity-70">
             Điền đúng <span className="font-black text-[#679436]">{score}/{total}</span> từ
           </p>
+          <p className="mt-2 text-2xl font-black text-[#FF9F1C] drop-shadow-md">
+            +{xpGained} XP
+          </p>
         </div>
         <div className="flex gap-4">
           <button
-            onClick={() => { setIndex(0); setInput(''); setSubmitted(false); setScore(0) }}
+            onClick={() => { setIndex(0); setInput(''); setSubmitted(false); setScore(0); setCompleted(false); }}
             className="rounded-xl border-4 border-secondary bg-[#679436] px-8 py-3 font-black uppercase text-surface shadow-[4px_4px_0px_0px_#283f3b] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
             Làm lại
@@ -67,8 +96,8 @@ export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) 
   return (
     <div className="py-4">
       <button
-        onClick={onBack}
-        className="mb-8 flex items-center gap-2 font-black uppercase text-secondary transition-all hover:-translate-x-1"
+        onClick={() => { finishSession(); props.onBack() }}
+        className="mb-6 flex items-center gap-2 font-black uppercase text-secondary transition-all hover:-translate-x-1"
       >
         <span className="material-symbols-outlined">arrow_back</span>
         {deckTitle}
@@ -77,8 +106,8 @@ export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) 
       <div className="mx-auto max-w-2xl">
         {/* Progress */}
         <div className="mb-6 flex items-center justify-between">
-          <span className="font-black uppercase text-sm opacity-60">{index + 1} / {total}</span>
-          <div className="h-3 w-2/3 overflow-hidden rounded-full border-2 border-secondary bg-surface">
+          <span className="font-black w-2/20 uppercase text-sm opacity-60">{index + 1} / {total}</span>
+          <div className="h-3 w-full overflow-hidden rounded-full border-2 border-secondary bg-surface">
             <div
               className="h-full bg-[#679436] transition-all duration-300"
               style={{ width: `${(index / total) * 100}%` }}
@@ -90,7 +119,7 @@ export default function ClozeView({ deckTitle, words, onBack }: ClozeViewProps) 
           {/* Hint */}
           <div className="mb-6 flex items-center gap-3">
             <span className="rounded-full border-2 border-secondary px-3 py-0.5 text-xs font-black uppercase">{card.type}</span>
-            <span className="text-sm font-bold italic opacity-60">Gợi ý: {card.def}</span>
+            <span className="text-sm font-bold italic opacity-60">Gợi ý: {card.def || card.mean}</span>
           </div>
 
           {/* Cloze sentence */}

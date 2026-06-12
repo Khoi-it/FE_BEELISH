@@ -4,12 +4,16 @@ interface FlashcardViewProps {
   deckTitle: string;
   words: any[];
   onBack: () => void;
+  onUpdateWord?: (index: number, learned: boolean) => void;
+  onComplete?: (newWords: number, xpGained: number) => void;
 }
 
-export default function FlashcardView({ deckTitle, words, onBack }: FlashcardViewProps) {
+export default function FlashcardView(props: FlashcardViewProps) {
+  const { deckTitle, words, onBack } = props;
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [results, setResults] = useState<('known' | 'unknown')[]>([])
+  const [completed, setCompleted] = useState(false)
 
   const card = words[index]
   const total = words.length
@@ -17,12 +21,31 @@ export default function FlashcardView({ deckTitle, words, onBack }: FlashcardVie
 
   function handleAnswer(known: boolean) {
     setResults((prev) => [...prev, known ? 'known' : 'unknown'])
+    if (props.onUpdateWord) {
+      props.onUpdateWord(index, known)
+    }
     setFlipped(false)
     setTimeout(() => setIndex((i) => i + 1), 300)
   }
 
-  if (done === total) {
+  const finishSession = () => {
+    if (!completed) {
+      setCompleted(true)
+      const knownCount = results.filter((r) => r === 'known').length
+      const xpGained = knownCount * 10
+      
+      if (props.onComplete && knownCount > 0) {
+        props.onComplete(knownCount, xpGained)
+      }
+    }
+  }
+
+  if (done === total && total > 0) {
+    finishSession()
+    
     const knownCount = results.filter((r) => r === 'known').length
+    const xpGained = knownCount * 10
+
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 py-12 text-center">
         <div className="rounded-full border-4 border-secondary bg-primary p-6 shadow-[6px_6px_0px_0px_#283f3b]">
@@ -35,10 +58,13 @@ export default function FlashcardView({ deckTitle, words, onBack }: FlashcardVie
           <p className="mt-3 text-xl font-bold opacity-70">
             Bạn đã thuộc <span className="font-black text-tertiary">{knownCount}/{total}</span> từ
           </p>
+          <p className="mt-2 text-2xl font-black text-[#FF9F1C] drop-shadow-md">
+            +{xpGained} XP
+          </p>
         </div>
         <div className="flex gap-4">
           <button
-            onClick={() => { setIndex(0); setFlipped(false); setResults([]) }}
+            onClick={() => { setIndex(0); setFlipped(false); setResults([]); setCompleted(false); }}
             className="rounded-xl border-4 border-secondary bg-primary px-8 py-3 font-black uppercase shadow-[4px_4px_0px_0px_#283f3b] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
             Học lại
@@ -56,10 +82,10 @@ export default function FlashcardView({ deckTitle, words, onBack }: FlashcardVie
 
   return (
     <div className="py-4">
-      <button
-        onClick={onBack}
-        className="mb-8 flex items-center gap-2 font-black uppercase text-secondary transition-all hover:-translate-x-1"
-      >
+        <button
+          onClick={() => { finishSession(); props.onBack() }}
+          className="mb-6 flex items-center gap-2 font-black uppercase text-secondary transition-all hover:-translate-x-1"
+        >
         <span className="material-symbols-outlined">arrow_back</span>
         {deckTitle}
       </button>
@@ -67,8 +93,8 @@ export default function FlashcardView({ deckTitle, words, onBack }: FlashcardVie
       <div className="mx-auto max-w-2xl">
         {/* Progress */}
         <div className="mb-6 flex items-center justify-between">
-          <span className="font-black uppercase text-sm opacity-60">{index + 1} / {total}</span>
-          <div className="h-3 w-2/3 overflow-hidden rounded-full border-2 border-secondary bg-surface">
+          <span className="font-black w-2/20 uppercase text-sm opacity-60">{index + 1} / {total}</span>
+          <div className="h-3 w-full overflow-hidden rounded-full border-2 border-secondary bg-surface">
             <div
               className="h-full bg-primary transition-all duration-300"
               style={{ width: `${((index) / total) * 100}%` }}
@@ -100,8 +126,8 @@ export default function FlashcardView({ deckTitle, words, onBack }: FlashcardVie
               className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl border-4 border-secondary bg-primary p-10 shadow-[8px_8px_0px_0px_#283f3b]"
               style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
             >
-              <p className="text-3xl font-black">{card.def}</p>
-              <p className="mt-2 text-center text-base italic opacity-80">"{card.ex}"</p>
+              <p className="text-3xl font-black">{card.def || card.mean}</p>
+              <p className="mt-2 text-center text-base italic opacity-80">"{card.ex || card.example}"</p>
             </div>
           </div>
         </div>
