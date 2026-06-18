@@ -17,3 +17,12 @@ export const getVideoById = async (id: string | number) => {
     if (!response.ok) throw new Error('Failed to fetch video');
     return response.json();
 };
+
+export const getVideoTranscript = async (videoId: string) => {
+    // Lưu ý: Đảm bảo endpoint này trùng khớp với cấu hình phía Backend của bạn
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VIDEOS}/transcript/${videoId}`, {
+        method: 'GET'
+    });
+    if (!response.ok) throw new Error('Failed to fetch transcript');
+    return response.json();
+};

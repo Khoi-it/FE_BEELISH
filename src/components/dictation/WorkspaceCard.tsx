@@ -1,4 +1,12 @@
-export default function WorkspaceCard() {
+import { TranscriptItem } from './TranscriptCard';
+
+interface WorkspaceCardProps {
+  activeTranscript?: TranscriptItem | null;
+}
+
+export default function WorkspaceCard({ activeTranscript }: WorkspaceCardProps) {
+  const words = activeTranscript ? activeTranscript.text.split(' ') : [];
+
   return (
     <section className="col-span-5 flex flex-col">
       <div className="flex flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow flex-1">
@@ -12,17 +20,16 @@ export default function WorkspaceCard() {
         </div>
 
         <div className="flex flex-col gap-6 p-8">
-          <div className="flex flex-wrap gap-x-2 gap-y-1 text-xl font-bold leading-relaxed">
-            <span className="underline decoration-4 underline-offset-4 text-dict-green">Yesterday</span>
-            <span className="underline decoration-4 underline-offset-4 text-dict-green">I</span>
-            <span className="underline decoration-4 underline-offset-4 text-dict-green">decided</span>
-            <span className="underline decoration-4 underline-offset-4 text-dict-green">to</span>
-            <span className="bg-dict-red/10 px-1 underline-offset-4 decoration-4 text-dict-red">
-              go
-            </span>
-            <span className="border-b-0 opacity-30">visit</span>
-            <span className="opacity-30">the</span>
-            <span className="opacity-30">museum</span>
+          <div className="flex flex-wrap gap-x-2 gap-y-1 text-xl font-bold leading-relaxed min-h-[60px]">
+            {words.length > 0 ? (
+              words.map((word, idx) => (
+                <span key={idx} className="underline decoration-4 underline-offset-4 text-border-dark opacity-80">
+                  {word}
+                </span>
+              ))
+            ) : (
+              <span className="opacity-30 italic">Video is playing...</span>
+            )}
           </div>
 
           <textarea
