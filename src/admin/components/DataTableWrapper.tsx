@@ -7,9 +7,11 @@ interface DataTableWrapperProps {
   columns: any[];
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  editLabel?: string;
+  deleteLabel?: string;
 }
 
-export default function DataTableWrapper({ data, columns, onEdit, onDelete }: DataTableWrapperProps) {
+export default function DataTableWrapper({ data, columns, onEdit, onDelete, editLabel = 'Edit', deleteLabel = 'Delete' }: DataTableWrapperProps) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
 
@@ -22,11 +24,12 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete }: Da
           title: 'Actions',
           data: 'id',
           orderable: false,
-          render: (data: string) => {
+          render: (data: string, type: any, row: any) => {
+            // allow dynamic delete label if passed as function (advanced) or just use the prop
             return `
               <div class="d-flex gap-2">
-                ${onEdit ? `<button class="btn btn-sm btn-primary edit-btn" data-id="${data}"><i class="bi bi-pencil"></i> Edit</button>` : ''}
-                ${onDelete ? `<button class="btn btn-sm btn-danger delete-btn text-white" data-id="${data}"><i class="bi bi-trash"></i> Delete</button>` : ''}
+                ${onEdit ? `<button class="btn btn-sm btn-primary edit-btn" data-id="${data}"><i class="bi bi-pencil"></i> ${editLabel}</button>` : ''}
+                ${onDelete ? `<button class="btn btn-sm ${row.delete ? 'btn-success' : 'btn-danger'} delete-btn text-white" data-id="${data}"><i class="bi ${row.delete ? 'bi-unlock' : 'bi-lock'}"></i> ${row.delete ? 'Mở khóa' : deleteLabel}</button>` : ''}
               </div>
             `;
           },

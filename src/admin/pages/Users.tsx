@@ -1,38 +1,173 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DataTableWrapper from '../components/DataTableWrapper';
 
 export default function Users() {
-  const [users, setUsers] = useState([
-    { id: 'u1', username: 'johndoe', email: 'john@example.com', role: 'LEARNER', status: 'Active' },
-    { id: 'u2', username: 'janesmith', email: 'jane@example.com', role: 'LEARNER', status: 'Inactive' },
-    { id: 'u3', username: 'admin_user', email: 'admin@beelish.com', role: 'ADMIN', status: 'Active' },
-  ]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Modal states
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState('ROLE_USER');
+  const [isCurrentlyBlocked, setIsCurrentlyBlocked] = useState(false);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('http://localhost:8080/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const result = await response.json();
+      if (response.ok && result.data) {
+        setUsers(result.data);
+      } else {
+        setError(result.message || 'Lỗi khi tải danh sách người dùng');
+      }
+    } catch (err) {
+      setError('Lỗi kết nối đến server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openBlockModal = (id: string) => {
+    const user = users.find((u) => u.id === id);
+    if (user) {
+      setSelectedUserId(id);
+      setIsCurrentlyBlocked(user.delete || false);
+      setShowBlockModal(true);
+    }
+  };
+
+  const submitToggleBlock = async () => {
+    if (!selectedUserId) return;
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`http://localhost:8080/api/admin/users/${selectedUserId}/block`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        setShowBlockModal(false);
+        fetchUsers();
+      } else {
+        alert('Có lỗi xảy ra khi cập nhật trạng thái.');
+      }
+    } catch (err) {
+      alert('Lỗi kết nối đến server');
+    }
+  };
+
+  const openRoleModal = (id: string) => {
+    const user = users.find((u) => u.id === id);
+    if (user) {
+      setSelectedUserId(id);
+      setSelectedRole(user.roleId || 'ROLE_USER');
+      setShowRoleModal(true);
+    }
+  };
+
+  const submitSetRole = async () => {
+    if (!selectedUserId) return;
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`http://localhost:8080/api/admin/users/${selectedUserId}/role?roleId=${selectedRole}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        setShowRoleModal(false);
+        fetchUsers();
+      } else {
+        alert('Có lỗi xảy ra khi cập nhật quyền.');
+      }
+    } catch (err) {
+      alert('Lỗi kết nối đến server');
+    }
+  };
 
   const columns = [
-    { title: 'ID', data: 'id' },
-    { title: 'Username', data: 'username', render: (data: string) => `<strong>${data}</strong>` },
+    { title: 'Tên đăng nhập', data: 'name', render: (data: string, type: any, row: any) => `<strong>${data || ''}</strong> ${row.delete ? '<span class="badge bg-danger ms-2">Bị khóa</span>' : ''}` },
+    { title: 'Họ tên', data: 'fullName' },
     { title: 'Email', data: 'email' },
     { 
-      title: 'Role', 
-      data: 'role',
-      render: (data: string) => `<span class="badge ${data === 'ADMIN' ? 'bg-danger' : 'bg-secondary'}">${data}</span>`
+      title: 'Quyền', 
+      data: 'roleId',
+      render: (data: string) => `<span class="badge ${data === 'ROLE_ADMIN' ? 'bg-danger' : 'bg-primary'}">${data === 'ROLE_ADMIN' ? 'ADMIN' : 'USER'}</span>`
     },
-    { 
-      title: 'Status', 
-      data: 'status',
-      render: (data: string) => `<span class="badge ${data === 'Active' ? 'bg-success' : 'bg-secondary'}">${data}</span>`
-    },
+    { title: 'Level', data: 'level', render: (data: string) => data || 'N/A' },
+    { title: 'XP', data: 'totalXP' }
   ];
+
+  if (loading) {
+    return <div className="p-4 text-center fw-bold">Đang tải dữ liệu người dùng...</div>;
+  }
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold m-0">Users Management</h2>
+        <h2 className="fw-bold m-0">Quản lý người dùng</h2>
       </div>
 
-      <div className="card p-4">
-        <DataTableWrapper data={users} columns={columns} onEdit={() => {}} onDelete={() => {}} />
+      {error && <div className="alert alert-danger">{error}</div>}
+
+      <div className="card p-4 chunky-border border-3">
+        <DataTableWrapper 
+          data={users} 
+          columns={columns} 
+          onEdit={openRoleModal} 
+          onDelete={openBlockModal}
+          editLabel="Cấp quyền"
+          deleteLabel="Khóa"
+        />
       </div>
+
+      {/* Role Modal overlay */}
+      {showRoleModal && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="card p-4 chunky-border border-3 bg-white" style={{ minWidth: '400px' }}>
+            <h4 className="fw-bold mb-3">Cấp quyền người dùng</h4>
+            <div className="mb-4">
+              <label className="fw-bold mb-2">Chọn quyền mới:</label>
+              <select className="form-select border-3 border-dark" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)}>
+                <option value="ROLE_USER">Người dùng (ROLE_USER)</option>
+                <option value="ROLE_ADMIN">Quản trị viên (ROLE_ADMIN)</option>
+              </select>
+            </div>
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-secondary fw-bold" onClick={() => setShowRoleModal(false)}>Hủy</button>
+              <button className="btn btn-primary fw-bold" onClick={submitSetRole}>Lưu thay đổi</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block Modal overlay */}
+      {showBlockModal && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="card p-4 chunky-border border-3 bg-white" style={{ minWidth: '400px' }}>
+            <h4 className="fw-bold mb-3">{isCurrentlyBlocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}</h4>
+            <p className="mb-4">
+              Bạn có chắc chắn muốn {isCurrentlyBlocked ? 'mở khóa' : 'khóa'} người dùng này không? 
+              {!isCurrentlyBlocked && ' Người dùng bị khóa sẽ không thể đăng nhập vào hệ thống.'}
+            </p>
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-secondary fw-bold" onClick={() => setShowBlockModal(false)}>Hủy</button>
+              <button className={`btn fw-bold ${isCurrentlyBlocked ? 'btn-success' : 'btn-danger'}`} onClick={submitToggleBlock}>
+                {isCurrentlyBlocked ? 'Xác nhận Mở khóa' : 'Xác nhận Khóa'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
