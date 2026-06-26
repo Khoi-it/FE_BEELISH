@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --beelish-primary: #ffbf00;
+  --beelish-secondary: #283F3B;
+  --beelish-bg: #e5d1d0;
+  --beelish-surface: #fcfbf8;
+  --beelish-success: #679436;
+  --beelish-danger: #ef4444;
+  
+  --beelish-border: 3px solid var(--beelish-secondary);
+  --beelish-shadow: 4px 4px 0px 0px var(--beelish-secondary);
+  --beelish-shadow-sm: 2px 2px 0px 0px var(--beelish-secondary);
+}
+
+.admin-body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--beelish-bg);
+  color: var(--beelish-secondary);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Custom Bootstrap Overrides for Admin */
+.admin-body .bg-primary { background-color: var(--beelish-primary) !important; }
+.admin-body .bg-secondary { background-color: var(--beelish-secondary) !important; }
+.admin-body .bg-success { background-color: var(--beelish-success) !important; }
+.admin-body .bg-danger { background-color: var(--beelish-danger) !important; }
+
+.admin-body .text-primary { color: var(--beelish-primary) !important; }
+.admin-body .text-secondary { color: var(--beelish-secondary) !important; }
+
+.admin-body .card {
+  background-color: var(--beelish-surface);
+  border: var(--beelish-border);
+  border-radius: 0.5rem;
+  box-shadow: var(--beelish-shadow);
+  margin-bottom: 1.5rem;
+}
+
+.admin-body .btn-primary {
+  background-color: var(--beelish-primary);
+  color: var(--beelish-secondary);
+  border: var(--beelish-border);
+  font-weight: 600;
+  box-shadow: var(--beelish-shadow-sm);
+  transition: all 0.2s ease-in-out;
+}
+
+.admin-body .btn-primary:hover {
+  background-color: #e6ac00;
+  transform: translate(-1px, -1px);
+  box-shadow: var(--beelish-shadow);
+}
+
+.admin-body .btn-secondary, .admin-body .btn-dark {
+  background-color: var(--beelish-secondary);
+  color: #fff;
+  border: 2px solid #000;
+}
+
+/* Sidebar styling */
+.admin-sidebar {
+  min-width: 250px;
+  max-width: 250px;
+  min-height: 100vh;
+  background-color: var(--beelish-surface);
+  border-right: var(--beelish-border);
+  transition: all 0.3s;
+}
+
+.admin-sidebar.collapsed {
+  margin-left: -250px;
+}
+
+.admin-sidebar .nav-link {
+  color: var(--beelish-secondary);
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(40, 63, 59, 0.1);
+}
+
+.admin-sidebar .nav-link:hover, .admin-sidebar .nav-link.active {
+  background-color: var(--beelish-primary);
+  color: var(--beelish-secondary);
+  font-weight: 600;
+}
+
+/* Topbar */
+.admin-topbar {
+  background-color: var(--beelish-primary);
+  border-bottom: var(--beelish-border);
+  box-shadow: 0 4px 0 0 rgba(40, 63, 59, 1);
+  z-index: 10;
+}
+
+/* DataTables Overrides */
+.admin-body table.dataTable {
+  border-collapse: collapse !important;
+}
+.admin-body table.dataTable thead th {
+  border-bottom: var(--beelish-border);
+  background-color: rgba(40, 63, 59, 0.05);
+  color: var(--beelish-secondary);
+}
+.admin-body table.dataTable tbody td {
+  border-bottom: 1px solid rgba(40, 63, 59, 0.2);
+  vertical-align: middle;
+}
+.admin-body div.dataTables_wrapper div.dataTables_filter input {
+  border: 2px solid var(--beelish-secondary);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
