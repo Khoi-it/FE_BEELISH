@@ -58,8 +58,12 @@ export default function LoginPage() {
             setUsername('')
             setPassword('')
 
-            // Chuyển sang trang chủ
-            navigate(ROUTES.HOME)
+            // Chuyển sang trang admin hoặc trang chủ dựa vào role
+            if (result.data.user && result.data.user.roleId === 'ROLE_ADMIN') {
+                navigate('/admin');
+            } else {
+                navigate(ROUTES.HOME);
+            }
         } catch (error) {
             // Kiểm tra xem error có phải là một Error object chuẩn không
             if (error instanceof Error) {
