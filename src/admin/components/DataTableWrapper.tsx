@@ -1,0 +1,82 @@
+import { useEffect, useRef } from 'react';
+import $ from 'jquery';
+import 'datatables.net-bs5';
+
+interface DataTableWrapperProps {
+  data: any[];
+  columns: any[];
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  editLabel?: string;
+  deleteLabel?: string;
+}
+
+export default function DataTableWrapper({ data, columns, onEdit, onDelete, editLabel = 'Edit', deleteLabel = 'Delete' }: DataTableWrapperProps) {
+  const tableRef = useRef<HTMLTableElement>(null);
+  const dataTableRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (tableRef.current) {
+      // Add action columns if onEdit or onDelete is provided
+      const finalColumns = [...columns];
+      if (onEdit || onDelete) {
+        finalColumns.push({
+          title: 'Actions',
+          data: 'id',
+          orderable: false,
+          render: (data: string, type: any, row: any) => {
+            // allow dynamic delete label if passed as function (advanced) or just use the prop
+            return `
+              <div class="d-flex gap-2">
+                ${onEdit ? `<button class="btn btn-sm btn-primary edit-btn" data-id="${data}"><i class="bi bi-pencil"></i> ${editLabel}</button>` : ''}
+                ${onDelete ? `<button class="btn btn-sm ${row.delete ? 'btn-success' : 'btn-danger'} delete-btn text-white" data-id="${data}"><i class="bi ${row.delete ? 'bi-unlock' : 'bi-lock'}"></i> ${row.delete ? 'Mở khóa' : deleteLabel}</button>` : ''}
+              </div>
+            `;
+          },
+        });
+      }
+
+      // Initialize DataTable
+      dataTableRef.current = $(tableRef.current).DataTable({
+        data,
+        columns: finalColumns,
+        destroy: true,
+        responsive: true,
+        pageLength: 10,
+        language: {
+          search: "",
+          searchPlaceholder: "Search records...",
+        }
+      });
+
+      // Handle button clicks since they are rendered via string (bypassing React)
+      $(tableRef.current).on('click', '.edit-btn', function() {
+        const id = $(this).data('id');
+        if (onEdit) onEdit(id);
+      });
+
+      $(tableRef.current).on('click', '.delete-btn', function() {
+        const id = $(this).data('id');
+        if (onDelete) onDelete(id);
+      });
+    }
+
+    return () => {
+      // Cleanup
+      if (dataTableRef.current) {
+        dataTableRef.current.destroy();
+      }
+      if (tableRef.current) {
+        $(tableRef.current).off('click', '.edit-btn');
+        $(tableRef.current).off('click', '.delete-btn');
+      }
+    };
+  }, [data, columns, onEdit, onDelete]);
+
+  return (
+    <div className="table-responsive">
+      <table ref={tableRef} className="table table-striped table-hover w-100 align-middle">
+      </table>
+    </div>
+  );
+}
