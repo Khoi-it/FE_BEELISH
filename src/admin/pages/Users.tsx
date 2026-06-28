@@ -95,7 +95,16 @@ export default function Users() {
   };
 
   const columns = [
-    { title: 'Tên đăng nhập', data: 'name', render: (data: string, type: any, row: any) => `<strong>${data || ''}</strong> ${row.delete ? '<span class="badge bg-danger ms-2">Bị khóa</span>' : ''}` },
+    { 
+      title: 'Tên đăng nhập', 
+      data: 'name', 
+      width: '25%',
+      render: (data: string, type: any, row: any) => 
+        `<div style="word-break: break-word; min-width: 150px;">
+          <strong>${data || row.email || ''}</strong> 
+          ${row.isDelete ? '<span class="badge bg-danger ms-2">Bị khóa</span>' : ''}
+        </div>` 
+    },
     { title: 'Họ tên', data: 'fullName' },
     { title: 'Email', data: 'email' },
     { 

@@ -7,11 +7,13 @@ interface DataTableWrapperProps {
   columns: any[];
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onManage?: (id: string) => void;
   editLabel?: string;
   deleteLabel?: string;
+  manageLabel?: string;
 }
 
-export default function DataTableWrapper({ data, columns, onEdit, onDelete, editLabel = 'Edit', deleteLabel = 'Delete' }: DataTableWrapperProps) {
+export default function DataTableWrapper({ data, columns, onEdit, onDelete, onManage, editLabel = 'Edit', deleteLabel = 'Delete', manageLabel = 'Manage' }: DataTableWrapperProps) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
 
@@ -19,15 +21,15 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete, edit
     if (tableRef.current) {
       // Add action columns if onEdit or onDelete is provided
       const finalColumns = [...columns];
-      if (onEdit || onDelete) {
+      if (onEdit || onDelete || onManage) {
         finalColumns.push({
           title: 'Actions',
           data: 'id',
           orderable: false,
           render: (data: string, type: any, row: any) => {
-            // allow dynamic delete label if passed as function (advanced) or just use the prop
             return `
               <div class="d-flex gap-2">
+                ${onManage ? `<button class="btn btn-sm btn-info manage-btn text-white" data-id="${data}"><i class="bi bi-list-ul"></i> ${manageLabel}</button>` : ''}
                 ${onEdit ? `<button class="btn btn-sm btn-primary edit-btn" data-id="${data}"><i class="bi bi-pencil"></i> ${editLabel}</button>` : ''}
                 ${onDelete ? `<button class="btn btn-sm ${row.delete ? 'btn-success' : 'btn-danger'} delete-btn text-white" data-id="${data}"><i class="bi ${row.delete ? 'bi-unlock' : 'bi-lock'}"></i> ${row.delete ? 'Mở khóa' : deleteLabel}</button>` : ''}
               </div>
@@ -55,6 +57,11 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete, edit
         if (onEdit) onEdit(id);
       });
 
+      $(tableRef.current).on('click', '.manage-btn', function() {
+        const id = $(this).data('id');
+        if (onManage) onManage(id);
+      });
+
       $(tableRef.current).on('click', '.delete-btn', function() {
         const id = $(this).data('id');
         if (onDelete) onDelete(id);
@@ -67,6 +74,7 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete, edit
         dataTableRef.current.destroy();
       }
       if (tableRef.current) {
+        $(tableRef.current).off('click', '.manage-btn');
         $(tableRef.current).off('click', '.edit-btn');
         $(tableRef.current).off('click', '.delete-btn');
       }

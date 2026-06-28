@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout';
 import Dashboard from './pages/Dashboard';
-import VocabWords from './pages/VocabWords';
 import VocabSets from './pages/VocabSets';
+import VocabSetWords from './pages/VocabSetWords';
 import Videos from './pages/Videos';
 import Users from './pages/Users';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,8 +19,8 @@ export default function AppAdmin() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
-        <Route path="words" element={<VocabWords />} />
         <Route path="vocab-sets" element={<VocabSets />} />
+        <Route path="vocab-sets/:id/words" element={<VocabSetWords />} />
         <Route path="videos" element={<Videos />} />
         <Route path="users" element={<Users />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
