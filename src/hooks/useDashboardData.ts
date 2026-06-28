@@ -22,7 +22,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const response = await fetchWithAuth('http://localhost:8080/api/v1/home/dashboard', {
+        const response = await fetchWithAuth('http://localhost:8080/api/home/dashboard', {
           method: 'GET'
         });
         

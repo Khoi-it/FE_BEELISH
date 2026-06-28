@@ -7,6 +7,9 @@ import VocabularyPage from './pages/VocabularyPage'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import { ROUTES } from './constants/routes'
 import AppAdmin from './admin/AppAdmin'
 
@@ -22,6 +25,9 @@ export default function App() {
             <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="*" element={<Navigate to={ROUTES.LANDING} replace />} />
         </Routes>
     )
