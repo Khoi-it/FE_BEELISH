@@ -12,6 +12,14 @@ export default function VocabSetWords() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedWord, setSelectedWord] = useState<any>(null);
+  
+  const [wordForm, setWordForm] = useState({ word: '', mean: '', type: '', example: '' });
+
+  const [conflictModalOpen, setConflictModalOpen] = useState(false);
+  const [conflictData, setConflictData] = useState<any[]>([]);
+  const [selectedConflicts, setSelectedConflicts] = useState<Set<string>>(new Set());
+  const [pendingActionType, setPendingActionType] = useState<'excel'|'manual'|null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   // Mock data for now
   const [words, setWords] = useState<any[]>([]);
@@ -39,7 +47,7 @@ export default function VocabSetWords() {
   };
 
   const columns = [
-    { title: 'Word', data: 'word', render: (data: string) => `<strong>${data}</strong>` },
+    { title: 'Word', data: 'word', render: (data: string) => `<strong>${data ? data.toLowerCase() : ''}</strong>` },
     { title: 'Meaning', data: 'mean' },
     { title: 'Type', data: 'type' },
     { title: 'Example', data: 'example' },
@@ -48,6 +56,7 @@ export default function VocabSetWords() {
   const handleEdit = (id: string) => {
     const w = words.find(x => x.id === id);
     setSelectedWord(w);
+    setWordForm({ word: w.word, mean: w.mean, type: w.type, example: w.example });
     setShowModal(true);
   };
 
@@ -57,9 +66,21 @@ export default function VocabSetWords() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setWords(words.filter(x => x.id !== selectedWord.id));
-    setShowDeleteModal(false);
+  const confirmDelete = async () => {
+    try {
+      const response = await fetchWithAuth(`http://localhost:8080/api/admin/words/${selectedWord.id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        setWords(words.filter(x => x.id !== selectedWord.id));
+        setShowDeleteModal(false);
+      } else {
+        alert('Xoá thất bại!');
+      }
+    } catch (error) {
+      console.error('Lỗi khi xoá', error);
+      alert('Đã xảy ra lỗi khi xoá.');
+    }
   };
 
   const handleDownloadTemplate = async () => {
@@ -86,29 +107,89 @@ export default function VocabSetWords() {
     }
   };
 
+  const processExcelUpload = async (file: File, action: string, wordsToReplace?: Set<string>) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    if (wordsToReplace && wordsToReplace.size > 0) {
+      Array.from(wordsToReplace).forEach(word => {
+        formData.append('wordsToReplace', word);
+      });
+    } else if (wordsToReplace && wordsToReplace.size === 0 && action === 'replace') {
+      // Báo cho backend biết là mảng rỗng để phân biệt với null
+      formData.append('wordsToReplace', ''); 
+    }
+    
+    try {
+      const response = await fetchWithAuth(`http://localhost:8080/api/admin/vocab-sets/${setId}/words/excel?action=${action}`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (response.ok) {
+        alert('Upload file Excel thành công!');
+        setConflictModalOpen(false);
+        setPendingFile(null);
+        fetchWords(); // Refresh words list here
+      } else if (response.status === 409) {
+        const result = await response.json();
+        setConflictData(result.data);
+        
+        const allWords = new Set<string>();
+        result.data.forEach((c: any) => allWords.add(c.newWord.word));
+        setSelectedConflicts(allWords);
+
+        setPendingFile(file);
+        setPendingActionType('excel');
+        setConflictModalOpen(true);
+      } else {
+        alert('Có lỗi xảy ra khi upload.');
+      }
+    } catch (error) {
+      console.error('Upload failed', error);
+    }
+  };
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      try {
-        const response = await fetchWithAuth(`http://localhost:8080/api/admin/vocab-sets/${setId}/words/excel`, {
-          method: 'POST',
-          body: formData,
-        });
-        if (response.ok) {
-          alert('Upload file Excel thành công!');
-          fetchWords(); // Refresh words list here
-        } else {
-          alert('Có lỗi xảy ra khi upload.');
-        }
-      } catch (error) {
-        console.error('Upload failed', error);
-      }
+      await processExcelUpload(file, 'check');
     }
     // Reset file input
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSaveWord = async (action: string = 'check') => {
+    try {
+      const isEdit = !!selectedWord;
+      const url = isEdit 
+        ? `http://localhost:8080/api/admin/words/${selectedWord.id}`
+        : `http://localhost:8080/api/admin/vocab-sets/${setId}/words?action=${action}`;
+      
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const response = await fetchWithAuth(url, {
+        method,
+        body: JSON.stringify(wordForm)
+      });
+
+      if (response.ok) {
+        setShowModal(false);
+        setConflictModalOpen(false);
+        fetchWords();
+      } else if (response.status === 409 && !isEdit) {
+        const result = await response.json();
+        setConflictData(result.data);
+        const allWords = new Set<string>();
+        result.data.forEach((c: any) => allWords.add(c.newWord.word));
+        setSelectedConflicts(allWords);
+        setPendingActionType('manual');
+        setConflictModalOpen(true);
+      } else {
+        alert('Có lỗi xảy ra khi lưu.');
+      }
+    } catch (error) {
+      console.error('Save failed', error);
+    }
   };
 
   return (
@@ -132,7 +213,11 @@ export default function VocabSetWords() {
           ref={fileInputRef} 
           onChange={handleFileChange} 
         />
-        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={() => { setSelectedWord(null); setShowModal(true); }}>
+        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={() => { 
+          setSelectedWord(null); 
+          setWordForm({ word: '', mean: '', type: '', example: '' });
+          setShowModal(true); 
+        }}>
           <Plus size={18} /> Add Word
         </button>
       </div>
@@ -156,24 +241,28 @@ export default function VocabSetWords() {
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label fw-bold">Word</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedWord?.word} />
+                    <input type="text" className="form-control border-dark border-2" 
+                           value={wordForm.word} onChange={(e) => setWordForm({...wordForm, word: e.target.value})} />
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold">Meaning</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedWord?.mean} />
+                    <input type="text" className="form-control border-dark border-2" 
+                           value={wordForm.mean} onChange={(e) => setWordForm({...wordForm, mean: e.target.value})} />
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold">Type (Noun, Verb, etc.)</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedWord?.type} />
+                    <input type="text" className="form-control border-dark border-2" 
+                           value={wordForm.type} onChange={(e) => setWordForm({...wordForm, type: e.target.value})} />
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold">Example</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedWord?.example} />
+                    <input type="text" className="form-control border-dark border-2" 
+                           value={wordForm.example} onChange={(e) => setWordForm({...wordForm, example: e.target.value})} />
                   </div>
                 </div>
                 <div className="modal-footer border-top border-dark border-3">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>Save</button>
+                  <button type="button" className="btn btn-primary" onClick={() => handleSaveWord('check')}>Save</button>
                 </div>
               </div>
             </div>
@@ -197,6 +286,89 @@ export default function VocabSetWords() {
                 <div className="modal-footer border-top border-danger">
                   <button type="button" className="btn btn-light border-dark border-2" onClick={() => setShowDeleteModal(false)}>Cancel</button>
                   <button type="button" className="btn btn-danger border-dark border-2" onClick={confirmDelete}>Yes, Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {conflictModalOpen && (
+        <>
+          <div className="modal-backdrop show" style={{ backgroundColor: 'rgba(40, 63, 59, 0.5)', zIndex: 1050 }}></div>
+          <div className="modal d-block show" tabIndex={-1} style={{ zIndex: 1055 }}>
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+              <div className="modal-content" style={{ border: 'var(--beelish-border)', boxShadow: 'var(--beelish-shadow)' }}>
+                <div className="modal-header border-bottom border-dark border-3 bg-warning text-dark">
+                  <h5 className="modal-title fw-bold">Phát hiện từ vựng trùng lặp</h5>
+                  <button type="button" className="btn-close" onClick={() => setConflictModalOpen(false)}></button>
+                </div>
+                <div className="modal-body overflow-auto" style={{ maxHeight: '60vh' }}>
+                  <p>Các từ vựng sau đã tồn tại trong bộ từ này. Hãy tích chọn các từ bạn muốn ghi đè bằng dữ liệu mới.</p>
+                  <table className="table table-bordered border-dark mt-3">
+                    <thead className="table-light">
+                      <tr>
+                        <th className="text-center" style={{ width: '5%' }}>
+                            <input type="checkbox" className="form-check-input border-dark"
+                               checked={selectedConflicts.size === conflictData.length && conflictData.length > 0}
+                               onChange={(e) => {
+                                 if (e.target.checked) {
+                                   const all = new Set<string>(conflictData.map(c => c.newWord.word));
+                                   setSelectedConflicts(all);
+                                 } else {
+                                   setSelectedConflicts(new Set());
+                                 }
+                               }}
+                            />
+                        </th>
+                        <th>Từ vựng</th>
+                        <th style={{ width: '40%' }}>Dữ liệu hiện tại (Cũ)</th>
+                        <th style={{ width: '40%' }}>Dữ liệu tải lên (Mới)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {conflictData.map((conflict, idx) => (
+                        <tr key={idx}>
+                          <td className="text-center">
+                             <input type="checkbox" className="form-check-input border-dark"
+                               checked={selectedConflicts.has(conflict.newWord.word)}
+                               onChange={(e) => {
+                                  const newSet = new Set(selectedConflicts);
+                                  if (e.target.checked) newSet.add(conflict.newWord.word);
+                                  else newSet.delete(conflict.newWord.word);
+                                  setSelectedConflicts(newSet);
+                               }}
+                             />
+                          </td>
+                          <td className="fw-bold">{conflict.newWord?.word}</td>
+                          <td>
+                            <div><strong>Nghĩa:</strong> {conflict.existingWord?.mean}</div>
+                            <div><strong>Loại:</strong> {conflict.existingWord?.type}</div>
+                            <div><strong>VD:</strong> {conflict.existingWord?.example}</div>
+                          </td>
+                          <td className="bg-light">
+                            <div><strong>Nghĩa:</strong> {conflict.newWord?.mean}</div>
+                            <div><strong>Loại:</strong> {conflict.newWord?.type}</div>
+                            <div><strong>VD:</strong> {conflict.newWord?.example}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="modal-footer border-top border-dark border-3 bg-light">
+                  <button type="button" className="btn btn-secondary border-dark border-2" onClick={() => setConflictModalOpen(false)}>Hủy bỏ</button>
+                  <button type="button" className="btn btn-warning border-dark border-2 fw-bold" onClick={() => {
+                    if (pendingActionType === 'excel' && pendingFile) {
+                      processExcelUpload(pendingFile, 'replace', selectedConflicts);
+                    } else if (pendingActionType === 'manual') {
+                      if (selectedConflicts.has(conflictData[0]?.newWord?.word)) {
+                         handleSaveWord('replace');
+                      } else {
+                         setConflictModalOpen(false);
+                      }
+                    }
+                  }}>Xác nhận thay thế</button>
                 </div>
               </div>
             </div>
