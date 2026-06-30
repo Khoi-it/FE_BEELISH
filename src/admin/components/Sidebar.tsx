@@ -13,7 +13,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: <Home size={20} className="me-2" /> },
     { name: 'Vocabulary Sets', path: '/admin/vocab-sets', icon: <Library size={20} className="me-2" /> },
-    { name: 'Words Management', path: '/admin/words', icon: <BookOpen size={20} className="me-2" /> },
     { name: 'Video Lessons', path: '/admin/videos', icon: <Video size={20} className="me-2" /> },
     { name: 'Users', path: '/admin/users', icon: <Users size={20} className="me-2" /> },
     { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} className="me-2" /> },

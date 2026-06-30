@@ -14,7 +14,7 @@ const navItems = [
 export default function AppHeader() {
     const {user} = useAuth();
     const [isLoggedIn, setIsLoggedIn] = useState(false)
-    const displayName = user?.name || 'Khách';
+    const displayName = user?.fullName || user?.name || 'Khách';
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
@@ -25,7 +25,7 @@ export default function AppHeader() {
 
     return (
         <header
-            className="flex items-center justify-between chunky-border bg-white px-4 py-3 rounded-xl chunky-shadow mb-8">
+            className="sticky top-4 z-50 flex items-center justify-between chunky-border bg-white px-4 py-3 rounded-xl chunky-shadow mb-8">
             {/*LEFT*/}
             <div className="flex items-center gap-4 shrink-0">
                 <Link to={ROUTES.LANDING} className="flex items-center gap-2">
@@ -91,6 +91,8 @@ export default function AppHeader() {
                             <div
                                 className="w-8 h-8 md:w-9 md:h-9 bg-primary chunky-border rounded-full overflow-hidden">
                                 <img alt="User Avatar"
+                                     className="w-full h-full object-cover"
+                                     referrerPolicy="no-referrer"
                                      src={user?.avatar|| 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}/>
                             </div>
                         </Link>

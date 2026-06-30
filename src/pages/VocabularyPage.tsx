@@ -5,6 +5,7 @@ import FlashcardView from '../components/vocabulary/FlashcardView'
 import ClozeView from '../components/vocabulary/ClozeView'
 import DeckCard from '../components/vocabulary/DeckCard'
 import StudyModeModal from '../components/vocabulary/StudyModeModal'
+import LoginRequiredModal from '../components/auth/LoginRequiredModal'
 import {getUserVocabSets, getSystemVocabSets, getWordsByDeckId, getCategories, recordStudySession} from '../api/vocabularyApi'
 
 interface Category {
@@ -47,6 +48,7 @@ export default function VocabularyPage() {
 
     const [isStudyModalOpen, setIsStudyModalOpen] = useState(false)
     const [studyMode, setStudyMode] = useState<'flashcard' | 'cloze' | null>(null)
+    const [showLoginModal, setShowLoginModal] = useState(false)
 
     const closeModal = () => setIsStudyModalOpen(false)
 
@@ -268,7 +270,13 @@ export default function VocabularyPage() {
                                                 </h3>
                                                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                                     {categoryDecks.map((deck, i) => (
-                                                        <DeckCard key={i} title={deck.title || ""} icon={deck.icon || "folder"} wordCount={deck.numOfWords || 0} progress={deck.learningProgress || 0} onSelect={() => setSelectedDeck(deck)}/>
+                                                        <DeckCard key={i} title={deck.title || ""} icon={deck.icon || "folder"} wordCount={deck.numOfWords || 0} progress={deck.learningProgress || 0} onSelect={() => {
+                                                            if (!user) {
+                                                                setShowLoginModal(true);
+                                                                return;
+                                                            }
+                                                            setSelectedDeck(deck);
+                                                        }}/>
                                                     ))}
                                                     {categoryDecks.length === 0 && (
                                                         <div className="col-span-full py-6 text-center border-4 border-dashed border-secondary/10 rounded-xl bg-surface/50">
@@ -377,6 +385,12 @@ export default function VocabularyPage() {
                     startStudy={startStudy}
                 />
             )}
+            
+            {/* ── Login Required Modal ── */}
+            <LoginRequiredModal 
+                isOpen={showLoginModal} 
+                onClose={() => setShowLoginModal(false)} 
+            />
         </div>
     )
 }

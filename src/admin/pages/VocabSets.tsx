@@ -1,25 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import DataTableWrapper from '../components/DataTableWrapper';
+import { fetchWithAuth } from '../../api/fetchClient';
 
 export default function VocabSets() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedSet, setSelectedSet] = useState<any>(null);
+  const navigate = useNavigate();
 
-  const [sets, setSets] = useState([
-    { id: 'Set 1', title: 'Advanced English', numOfWords: 150, icon: 'book', categoryID: 1, created_at: '2026-01-15' },
-    { id: 'Set 2', title: 'IELTS 7.0 Vocabulary', numOfWords: 300, icon: 'star', categoryID: 2, created_at: '2026-02-20' },
-    { id: 'Set 3', title: 'Everyday Phrasal Verbs', numOfWords: 80, icon: 'message', categoryID: 1, created_at: '2026-03-10' },
-  ]);
+  const [sets, setSets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSets();
+  }, []);
+
+  const fetchSets = async () => {
+    try {
+      const response = await fetchWithAuth('http://localhost:8080/api/vocab-sets');
+      if (response.ok) {
+        const data = await response.json();
+        setSets(data);
+      } else {
+        console.error('Failed to fetch vocab sets');
+      }
+    } catch (error) {
+      console.error('Error fetching vocab sets', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns = [
     { title: 'ID', data: 'id' },
     { title: 'Title', data: 'title', render: (data: string) => `<strong>${data}</strong>` },
     { title: 'Words Count', data: 'numOfWords' },
     { title: 'Category ID', data: 'categoryID' },
-    { title: 'Created At', data: 'created_at' },
+    { title: 'Icon', data: 'icon', render: (data: string) => data || 'N/A' },
+    { title: 'Created At', data: 'created_at', render: (data: string) => data || 'N/A' },
   ];
+
+  const handleManage = (id: string) => {
+    navigate(`/admin/vocab-sets/${id}/words`);
+  };
 
   const handleEdit = (id: string) => {
     const s = sets.find(x => x.id === id);
@@ -48,7 +73,14 @@ export default function VocabSets() {
       </div>
 
       <div className="card p-4">
-        <DataTableWrapper data={sets} columns={columns} onEdit={handleEdit} onDelete={handleDeleteClick} />
+        <DataTableWrapper 
+          data={sets} 
+          columns={columns} 
+          onEdit={handleEdit} 
+          onDelete={handleDeleteClick} 
+          onManage={handleManage}
+          manageLabel="Words" 
+        />
       </div>
 
       {showModal && (
