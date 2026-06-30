@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, BookOpen, Library, Video, Settings } from 'lucide-react';
+import { Home, Users, BookOpen, Library, Video, Settings, Image as ImageIcon, Bell } from 'lucide-react';
 import iconImage from '../../assets/icon.png';
 import textImage from '../../assets/text.png';
 
@@ -15,6 +15,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     { name: 'Vocabulary Sets', path: '/admin/vocab-sets', icon: <Library size={20} className="me-2" /> },
     { name: 'Video Lessons', path: '/admin/videos', icon: <Video size={20} className="me-2" /> },
     { name: 'Users', path: '/admin/users', icon: <Users size={20} className="me-2" /> },
+    { name: 'Notifications', path: '/admin/notifications', icon: <Bell size={20} className="me-2" /> },
+    { name: 'Icons', path: '/admin/icons', icon: <ImageIcon size={20} className="me-2" /> },
     { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} className="me-2" /> },
   ];
 

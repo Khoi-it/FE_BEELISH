@@ -4,6 +4,7 @@ import iconImage from '../../assets/icon.png'
 import textImage from '../../assets/text.png'
 import {ROUTES} from '../../constants/routes'
 import {useAuth} from "../../contexts/AuthContext.tsx";
+import { getNotifications, markAllAsRead, NotificationItem } from '../../api/notificationApi';
 
 const navItems = [
     {label: 'Tổng quan', route: ROUTES.HOME},
@@ -16,12 +17,36 @@ export default function AppHeader() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const displayName = user?.fullName || user?.name || 'Khách';
 
+    const [notifications, setNotifications] = useState<NotificationItem[]>([])
+    const [showNotifications, setShowNotifications] = useState(false)
+    const unreadCount = notifications.filter(n => !(n.read ?? (n as any).isRead)).length
+
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
         if (token) {
             setIsLoggedIn(true)
         }
     }, [])
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            getNotifications().then(res => {
+                setNotifications(Array.isArray(res) ? res : res.data || [])
+            }).catch(console.error)
+        }
+    }, [isLoggedIn])
+
+    const handleNotificationClick = async () => {
+        setShowNotifications(!showNotifications)
+        if (!showNotifications && unreadCount > 0) {
+            try {
+                await markAllAsRead();
+                setNotifications(prev => prev.map(n => ({...n, read: true, isRead: true})));
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
 
     return (
         <header
@@ -76,10 +101,55 @@ export default function AppHeader() {
                         </div>
 
                         {/*Notification*/}
-                        <button
-                            className="px-2 md:px-3 py-1.5 chunky-border rounded-lg hover:bg-primary transition-colors flex items-center justify-center h-10 md:h-12">
-                            <span className="material-symbols-outlined text-xl">notifications</span>
-                        </button>
+                        <div className="relative">
+                            <button
+                                onClick={handleNotificationClick}
+                                className="relative px-2 md:px-3 py-1.5 chunky-border rounded-lg hover:bg-primary transition-colors flex items-center justify-center h-10 md:h-12">
+                                <span className="material-symbols-outlined text-xl">notifications</span>
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-black">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white chunky-border rounded-xl chunky-shadow overflow-hidden z-50">
+                                    <div className="p-3 border-b-2 border-black bg-primary/20">
+                                        <h3 className="font-bold">Thông báo</h3>
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-4 text-center text-sm text-gray-500">
+                                                Không có thông báo nào.
+                                            </div>
+                                        ) : (
+                                            notifications.map(notif => {
+                                                const isUnread = typeof notif.read !== 'undefined' ? !notif.read : !(notif as any).isRead;
+                                                return (
+                                                    <div
+                                                        key={notif.id}
+                                                        className={`p-4 border-b-2 border-secondary/10 transition-colors hover:bg-surface-variant ${isUnread ? 'bg-primary/5' : ''}`}
+                                                    >
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <h4 className={`font-bold ${isUnread ? 'text-secondary' : 'text-secondary/70'}`}>
+                                                                {notif.title}
+                                                            </h4>
+                                                            {isUnread && (
+                                                                <div className="w-2 h-2 rounded-full bg-red-500 shrink-0 mt-1.5" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
+                                                        <span className="text-[10px] text-gray-400 mt-2 block">
+                                                            {new Date(notif.createdAt).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {/*User*/}
                         <Link to={ROUTES.PROFILE}

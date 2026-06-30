@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useState } from 'react';
 import LoginRequiredModal from '../auth/LoginRequiredModal';
 
-const getYoutubeVideoId = (url) => {
+const getYoutubeVideoId = (url: string) => {
   if (!url) return '';
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
@@ -17,7 +17,7 @@ const getYoutubeVideoId = (url) => {
 };
 
 // Hàm lấy thumbnail YouTube
-const getYoutubeThumbnail = (url) => {
+const getYoutubeThumbnail = (url: string) => {
   const videoId = getYoutubeVideoId(url);
   if (videoId) {
     return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
@@ -26,7 +26,7 @@ const getYoutubeThumbnail = (url) => {
 };
 
 // Thêm hàm chuyển đổi duration
-const formatDuration = (duration) => {
+const formatDuration = (duration: string | number) => {
   if (!duration) return '00:00';
 
   let hours = 0, minutes = 0, seconds = 0;
@@ -41,8 +41,8 @@ const formatDuration = (duration) => {
     }
   } 
   // Trường hợp 2: Dạng tổng số giây (VD: 3665)
-  else if (!isNaN(duration)) {
-    const totalSeconds = parseInt(duration, 10);
+  else if (!isNaN(Number(duration))) {
+    const totalSeconds = parseInt(String(duration), 10);
     hours = Math.floor(totalSeconds / 3600);
     minutes = Math.floor((totalSeconds % 3600) / 60);
     seconds = totalSeconds % 60;
@@ -65,7 +65,7 @@ export default function VideoCard({
   title,
   viewCount,
   upload_date,
-}) {
+}: { url: string, duration: string | number, title: string, viewCount: string | number, upload_date: string }) {
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const imageSrc = getYoutubeThumbnail(url);
@@ -99,7 +99,7 @@ export default function VideoCard({
           className="h-full w-full object-cover" 
           src={imageSrc} 
           alt={title} 
-          onError={(e) => {
+          onError={(e: any) => {
             e.target.src = imageSrc.replace('maxresdefault.jpg', 'hqdefault.jpg');
           }}
         />

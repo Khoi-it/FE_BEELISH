@@ -3,6 +3,8 @@ import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { fetchWithAuth } from '../../api/fetchClient';
+import { API_BASE_URL } from '../../constants/api';
+import { getIcons, IconItem } from '../../api/iconApi';
 
 export default function VocabSets() {
   const [showModal, setShowModal] = useState(false);
@@ -11,18 +13,29 @@ export default function VocabSets() {
   const navigate = useNavigate();
 
   const [sets, setSets] = useState<any[]>([]);
+  const [iconsList, setIconsList] = useState<IconItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchSets();
+    fetchIconsList();
   }, []);
+
+  const fetchIconsList = async () => {
+    try {
+      const result = await getIcons();
+      setIconsList(Array.isArray(result) ? result : result.data || []);
+    } catch (error) {
+      console.error('Error fetching icons', error);
+    }
+  };
 
   const fetchSets = async () => {
     try {
-      const response = await fetchWithAuth('http://localhost:8080/api/vocab-sets');
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/vocab-set/get-all`);
       if (response.ok) {
         const data = await response.json();
-        setSets(data);
+        setSets(Array.isArray(data.data) ? data.data : data || []);
       } else {
         console.error('Failed to fetch vocab sets');
       }
@@ -38,7 +51,9 @@ export default function VocabSets() {
     { title: 'Title', data: 'title', render: (data: string) => `<strong>${data}</strong>` },
     { title: 'Words Count', data: 'numOfWords' },
     { title: 'Category ID', data: 'categoryID' },
-    { title: 'Icon', data: 'icon', render: (data: string) => data || 'N/A' },
+    { title: 'Icon', data: 'icon', render: (data: string) => 
+      data ? `<div class="d-flex align-items-center gap-2"><span class="material-symbols-outlined text-primary">${data}</span> <small>${data}</small></div>` : 'N/A' 
+    },
     { title: 'Created At', data: 'created_at', render: (data: string) => data || 'N/A' },
   ];
 
@@ -106,7 +121,14 @@ export default function VocabSets() {
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold">Icon Name</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedSet?.icon} />
+                    <select className="form-select border-dark border-2" defaultValue={selectedSet?.icon || ''}>
+                      <option value="">-- Chọn Icon --</option>
+                      {iconsList.map(icon => (
+                        <option key={icon.id} value={icon.code}>
+                          {icon.name} ({icon.code})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="modal-footer border-top border-dark border-3">

@@ -49,7 +49,7 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete, onMa
           search: "",
           searchPlaceholder: "Search records...",
         }
-      });
+      } as any);
 
       // Handle button clicks since they are rendered via string (bypassing React)
       $(tableRef.current).on('click', '.edit-btn', function() {

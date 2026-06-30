@@ -9,6 +9,7 @@ interface DictationVideoPanelProps {
 
 export default function DictationVideoPanel({ videoId, onTimeUpdate }: DictationVideoPanelProps) {
   const playerRef = useRef<any>(null);
+  const syncIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -27,7 +28,7 @@ export default function DictationVideoPanel({ videoId, onTimeUpdate }: Dictation
   };
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isPlaying && playerRef.current) {
       interval = setInterval(async () => {
         const time = await playerRef.current.getCurrentTime();

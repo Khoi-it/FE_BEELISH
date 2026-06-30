@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../constants/api';
+
 export const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
     const accessToken = localStorage.getItem('accessToken');
 
@@ -46,7 +48,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
 
         try {
             // Gọi API refresh
-            const refreshResponse = await fetch('http://localhost:8080/auth/refresh', {
+            const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ refreshToken: refreshToken })

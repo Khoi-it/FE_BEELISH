@@ -5,6 +5,8 @@ import VocabSets from './pages/VocabSets';
 import VocabSetWords from './pages/VocabSetWords';
 import Videos from './pages/Videos';
 import Users from './pages/Users';
+import Icons from './pages/Icons';
+import Notifications from './pages/Notifications';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AppAdmin() {
@@ -23,6 +25,8 @@ export default function AppAdmin() {
         <Route path="vocab-sets/:id/words" element={<VocabSetWords />} />
         <Route path="videos" element={<Videos />} />
         <Route path="users" element={<Users />} />
+        <Route path="icons" element={<Icons />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>
     </Routes>
