@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Eye, Edit, Trash2, Ban } from 'lucide-react';
+import { API_BASE_URL } from '../../constants/api';
 import DataTableWrapper from '../components/DataTableWrapper';
 
 export default function Users() {
@@ -20,7 +22,7 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:8080/api/admin/users', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/user/get-all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -51,7 +53,7 @@ export default function Users() {
     if (!selectedUserId) return;
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:8080/api/admin/users/${selectedUserId}/block`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/user/toggle-block/${selectedUserId}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -79,7 +81,7 @@ export default function Users() {
     if (!selectedUserId) return;
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:8080/api/admin/users/${selectedUserId}/role?roleId=${selectedRole}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/user/update-role/${selectedUserId}?roleId=${selectedRole}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });

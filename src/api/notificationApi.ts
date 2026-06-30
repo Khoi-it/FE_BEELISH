@@ -11,10 +11,11 @@ export interface NotificationItem {
 }
 
 export const getNotifications = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/notification`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/notification/get-all`, {
         method: 'GET'
     });
-    return response.json();
+    const res = await response.json();
+    return res.data || res;
 };
 
 export const markAllAsRead = async () => {

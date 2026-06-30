@@ -116,11 +116,11 @@ export default function VocabularyPage() {
                     const actualUserDecks = Array.isArray(uDecks) ? uDecks : (uDecks.data || []);
                     
                     const systemDeckIds = new Set(actualSystemDecks.map(d => String(d.id)));
-                    const filteredUserDecks = actualUserDecks.filter(u => !systemDeckIds.has(String(u.vocabID)));
+                    const filteredUserDecks = actualUserDecks.filter((u: any) => !systemDeckIds.has(String(u.vocabID)));
                     setUserDecks(filteredUserDecks);
 
                     setSystemDecks(actualSystemDecks.map(sDeck => {
-                        const userDeck = actualUserDecks.find(u => String(u.vocabID) === String(sDeck.id));
+                        const userDeck = actualUserDecks.find((u: any) => String(u.vocabID) === String(sDeck.id));
                         return userDeck ? { ...sDeck, learningProgress: userDeck.learningProgress, memoryWords: userDeck.memoryWords } : sDeck;
                     }));
                 } catch (err) {

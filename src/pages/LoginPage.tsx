@@ -5,6 +5,7 @@ import { ROUTES } from '../constants/routes'
 import { useAuth } from "../contexts/AuthContext.tsx";
 import Footer from '../components/layout/Footer.tsx';
 import { useGoogleLogin } from '@react-oauth/google';
+import { API_BASE_URL } from '../constants/api';
 import AuthMessageModal from '../components/auth/AuthMessageModal';
 
 export default function LoginPage() {
@@ -28,8 +29,10 @@ export default function LoginPage() {
         }
     }, [location]);
 
-    const loginWithGoogle = useGoogleLogin({
-        onSuccess: (codeResponse) => handleGoogleSuccess(codeResponse),
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (codeResponse: any) => {
+            await handleGoogleSuccess(codeResponse);
+        },
         onError: () => setMessage({ type: 'error', text: 'Đăng nhập Google thất bại!' })
     });
 
@@ -39,7 +42,7 @@ export default function LoginPage() {
         setIsLoading(true)
 
         try {
-            const response = await fetch('http://localhost:8080/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,7 +102,7 @@ export default function LoginPage() {
         setMessage({ type: '', text: '' });
         try {
             const token = credentialResponse.access_token || credentialResponse.credential;
-            const response = await fetch('http://localhost:8080/auth/google', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -238,7 +241,7 @@ export default function LoginPage() {
                         <div className="flex justify-center">
                             <button
                                 type="button"
-                                onClick={() => loginWithGoogle()}
+                                onClick={() => googleLogin()}
                                 className="w-full bg-white text-moss-green font-bold py-3 rounded-xl border-2 border-moss-green text-base button-3d-secondary flex items-center justify-center gap-3 hover:bg-gray-50 transition-all"
                             >
                                 <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

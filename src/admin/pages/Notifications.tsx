@@ -26,9 +26,7 @@ export default function Notifications() {
   const fetchHistory = async () => {
     try {
       const result = await getNotificationHistory();
-      if (result && result.data) {
-        setHistory(result.data);
-      }
+      setHistory(Array.isArray(result) ? result : result.data || []);
     } catch (error) {
       console.error('Error fetching notification history', error);
     }
@@ -36,7 +34,7 @@ export default function Notifications() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/users`, { method: 'GET' });
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/user/get-all`, { method: 'GET' });
       const result = await response.json();
       if (response.ok && result.data) {
         setUsers(result.data);

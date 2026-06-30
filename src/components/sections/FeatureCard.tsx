@@ -1,6 +1,6 @@
 // import styles from '../../styles/LandingPage.module.css'
 
-export default function FeatureCard({ icon, title, description, iconBg }) {
+export default function FeatureCard({ icon, title, description, iconBg = "bg-primary" }: { icon: string, title: string, description: string, iconBg?: string }) {
   return (
     <article
       className={`group flex h-full cursor-default flex-col rounded-2xl bg-white p-8 border-[3px] border-[#283f3b] shadow-[8px_8px_0_0_#283f3b] transition-all duration-300 ease-out hover:-translate-y-3 hover:shadow-[8px_12px_0_0_#283f3b]`}

@@ -9,14 +9,15 @@ export interface IconItem {
 }
 
 export const getIcons = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icons`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icon/get-all`, {
         method: 'GET'
     });
-    return response.json();
+    const res = await response.json();
+    return res.data || res;
 };
 
 export const createIcon = async (name: string, code: string) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icons`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icon/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, code })
@@ -25,7 +26,7 @@ export const createIcon = async (name: string, code: string) => {
 };
 
 export const deleteIcon = async (id: string) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icons/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icon/delete/${id}`, {
         method: 'DELETE'
     });
     return response.json();

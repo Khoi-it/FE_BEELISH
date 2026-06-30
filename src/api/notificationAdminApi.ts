@@ -11,14 +11,15 @@ export interface NotificationLog {
 }
 
 export const getNotificationHistory = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/notifications/history`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/notification/get-history`, {
         method: 'GET'
     });
-    return response.json();
+    const res = await response.json();
+    return res.data || res;
 };
 
 export const sendNotification = async (payload: { targetType: string, targetUserId?: string, title: string, message: string }) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/notifications/send`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/notification/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

@@ -19,7 +19,7 @@ export default function AppHeader() {
 
     const [notifications, setNotifications] = useState<NotificationItem[]>([])
     const [showNotifications, setShowNotifications] = useState(false)
-    const unreadCount = notifications.filter(n => !n.read).length
+    const unreadCount = notifications.filter(n => !(n.read ?? (n as any).isRead)).length
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
@@ -31,7 +31,7 @@ export default function AppHeader() {
     useEffect(() => {
         if (isLoggedIn) {
             getNotifications().then(res => {
-                if (res.data) setNotifications(res.data)
+                setNotifications(Array.isArray(res) ? res : res.data || [])
             }).catch(console.error)
         }
     }, [isLoggedIn])
@@ -41,7 +41,7 @@ export default function AppHeader() {
         if (!showNotifications && unreadCount > 0) {
             try {
                 await markAllAsRead();
-                setNotifications(prev => prev.map(n => ({...n, isRead: true})));
+                setNotifications(prev => prev.map(n => ({...n, read: true, isRead: true})));
             } catch (e) {
                 console.error(e)
             }
@@ -123,15 +123,28 @@ export default function AppHeader() {
                                                 Không có thông báo nào.
                                             </div>
                                         ) : (
-                                            notifications.map(noti => (
-                                                <div key={noti.id} className={`p-3 border-b border-gray-200 hover:bg-gray-50 ${!noti.isRead ? 'bg-blue-50' : ''}`}>
-                                                    <h4 className="font-bold text-sm">{noti.title}</h4>
-                                                    <p className="text-xs text-gray-600 mt-1">{noti.message}</p>
-                                                    <span className="text-[10px] text-gray-400 mt-2 block">
-                                                        {new Date(noti.createdAt).toLocaleString()}
-                                                    </span>
-                                                </div>
-                                            ))
+                                            notifications.map(notif => {
+                                                const isUnread = typeof notif.read !== 'undefined' ? !notif.read : !(notif as any).isRead;
+                                                return (
+                                                    <div
+                                                        key={notif.id}
+                                                        className={`p-4 border-b-2 border-secondary/10 transition-colors hover:bg-surface-variant ${isUnread ? 'bg-primary/5' : ''}`}
+                                                    >
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <h4 className={`font-bold ${isUnread ? 'text-secondary' : 'text-secondary/70'}`}>
+                                                                {notif.title}
+                                                            </h4>
+                                                            {isUnread && (
+                                                                <div className="w-2 h-2 rounded-full bg-red-500 shrink-0 mt-1.5" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
+                                                        <span className="text-[10px] text-gray-400 mt-2 block">
+                                                            {new Date(notif.createdAt).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })
                                         )}
                                     </div>
                                 </div>

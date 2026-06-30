@@ -3,6 +3,7 @@ import { Plus, ArrowLeft, Upload, Download } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { fetchWithAuth } from '../../api/fetchClient';
+import { API_BASE_URL } from '../../constants/api';
 
 export default function VocabSetWords() {
   const { id: setId } = useParams();
@@ -31,7 +32,7 @@ export default function VocabSetWords() {
 
   const fetchWords = async () => {
     try {
-      const response = await fetchWithAuth(`http://localhost:8080/api/admin/vocab-sets/${setId}/words`);
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/get-words/${setId}`);
       if (response.ok) {
         const data = await response.json();
         // The API wraps the response in an ApiResponse, so we check data.data
@@ -68,7 +69,7 @@ export default function VocabSetWords() {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetchWithAuth(`http://localhost:8080/api/admin/words/${selectedWord.id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/delete-word/${selectedWord.id}`, {
         method: 'DELETE'
       });
       if (response.ok) {
@@ -85,7 +86,7 @@ export default function VocabSetWords() {
 
   const handleDownloadTemplate = async () => {
     try {
-      const response = await fetchWithAuth('http://localhost:8080/api/admin/vocab-sets/excel-template');
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/excel-template`);
       if (!response.ok) throw new Error('Failed to download');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -121,7 +122,7 @@ export default function VocabSetWords() {
     }
     
     try {
-      const response = await fetchWithAuth(`http://localhost:8080/api/admin/vocab-sets/${setId}/words/excel?action=${action}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/import-words/${setId}?action=${action}`, {
         method: 'POST',
         body: formData,
       });
@@ -162,8 +163,8 @@ export default function VocabSetWords() {
     try {
       const isEdit = !!selectedWord;
       const url = isEdit 
-        ? `http://localhost:8080/api/admin/words/${selectedWord.id}`
-        : `http://localhost:8080/api/admin/vocab-sets/${setId}/words?action=${action}`;
+        ? `${API_BASE_URL}/api/admin/vocab-set/update-word/${selectedWord.id}`
+        : `${API_BASE_URL}/api/admin/vocab-set/create-word/${setId}?action=${action}`;
       
       const method = isEdit ? 'PUT' : 'POST';
 

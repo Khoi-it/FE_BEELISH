@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../api/fetchClient';
+import { API_BASE_URL } from '../constants/api';
 
 interface VideoProgress {
   videoId: string;
@@ -22,7 +23,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const response = await fetchWithAuth('http://localhost:8080/api/home/dashboard', {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/home/dashboard`, {
           method: 'GET'
         });
         

@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { fetchWithAuth } from '../../api/fetchClient';
+import { API_BASE_URL } from '../../constants/api';
 import { getIcons, IconItem } from '../../api/iconApi';
 
 export default function VocabSets() {
@@ -23,9 +24,7 @@ export default function VocabSets() {
   const fetchIconsList = async () => {
     try {
       const result = await getIcons();
-      if (result && result.data) {
-        setIconsList(result.data);
-      }
+      setIconsList(Array.isArray(result) ? result : result.data || []);
     } catch (error) {
       console.error('Error fetching icons', error);
     }
@@ -33,10 +32,10 @@ export default function VocabSets() {
 
   const fetchSets = async () => {
     try {
-      const response = await fetchWithAuth('http://localhost:8080/api/vocab-sets');
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/vocab-set/get-all`);
       if (response.ok) {
         const data = await response.json();
-        setSets(data);
+        setSets(Array.isArray(data.data) ? data.data : data || []);
       } else {
         console.error('Failed to fetch vocab sets');
       }
