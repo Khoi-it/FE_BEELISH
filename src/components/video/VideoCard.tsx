@@ -1,6 +1,9 @@
 import { ROUTES } from '../../constants/routes'
 import { Link } from 'react-router-dom'
 import { Eye } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useState } from 'react';
+import LoginRequiredModal from '../auth/LoginRequiredModal';
 
 const getYoutubeVideoId = (url) => {
   if (!url) return '';
@@ -63,6 +66,8 @@ export default function VideoCard({
   viewCount,
   upload_date,
 }) {
+  const { user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const imageSrc = getYoutubeThumbnail(url);
   
   // Format lại duration
@@ -76,12 +81,19 @@ export default function VideoCard({
   const videoId = getYoutubeVideoId(url);
 
   return (
-    <Link
-      to={ROUTES.DICTATION}
-      state={{ videoId }}
-      className="flex cursor-pointer flex-col overflow-hidden rounded-xl border-none bg-white chunky-border shadow-chunky transition-all group hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-      aria-label={`Mở bài học: ${title}`}
-    >
+    <>
+      <Link
+        to={ROUTES.DICTATION}
+        state={{ videoId }}
+        onClick={(e) => {
+          if (!user) {
+            e.preventDefault();
+            setShowLoginModal(true);
+          }
+        }}
+        className="flex cursor-pointer flex-col overflow-hidden rounded-xl border-none bg-white chunky-border shadow-chunky transition-all group hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+        aria-label={`Mở bài học: ${title}`}
+      >
       <div className="relative h-48 bg-gray-200 overflow-hidden">
         <img 
           className="h-full w-full object-cover" 
@@ -107,5 +119,10 @@ export default function VideoCard({
         </div>
       </div>
     </Link>
+    <LoginRequiredModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
+    </>
   )
 }

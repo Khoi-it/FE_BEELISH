@@ -27,7 +27,13 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
     // Thực hiện request lần 1
     let response = await fetch(url, { ...options, headers });
 
-    // Kiểm tra lỗi 401 hoặc 403 (do cấu hình Security đôi khi trả về 403 khi hết hạn token)
+    // Xử lý tài khoản bị khoá (423 Locked)
+    if (response.status === 423) {
+        forceLogoutWithMessage('Tài khoản của bạn đã bị khoá bởi Quản trị viên!');
+        throw new Error("Tài khoản bị khóa");
+    }
+
+    // Kiểm tra lỗi 401 hoặc 403
     if (response.status === 401 || response.status === 403) {
         console.log("Access Token hết hạn! Đang gọi Refresh Token...");
 
@@ -82,4 +88,11 @@ const forceLogout = (): void => {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     window.location.href = '/login';
+};
+
+const forceLogoutWithMessage = (message: string): void => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    window.location.href = `/login?lockedError=${encodeURIComponent(message)}`;
 };

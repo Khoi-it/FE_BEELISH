@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import { ROUTES } from '../constants/routes'
 import { useAuth } from "../contexts/AuthContext.tsx";
 import Footer from '../components/layout/Footer.tsx';
 import { useGoogleLogin } from '@react-oauth/google';
+import AuthMessageModal from '../components/auth/AuthMessageModal';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')
@@ -16,6 +17,16 @@ export default function LoginPage() {
     const { setUser } = useAuth();
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const lockedError = queryParams.get('lockedError');
+        if (lockedError) {
+            setMessage({ type: 'error', text: lockedError });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [location]);
 
     const loginWithGoogle = useGoogleLogin({
         onSuccess: (codeResponse) => handleGoogleSuccess(codeResponse),
@@ -73,10 +84,10 @@ export default function LoginPage() {
         } catch (error) {
             // Kiểm tra xem error có phải là một Error object chuẩn không
             if (error instanceof Error) {
-                setMessage({ type: 'error', text: '❌ Lỗi: ' + error.message });
+                setMessage({ type: 'error', text: error.message });
             } else {
                 // Đề phòng trường hợp lỗi quái lạ nào đó không phải là Error
-                setMessage({ type: 'error', text: '❌ Đã xảy ra lỗi không xác định!' });
+                setMessage({ type: 'error', text: 'Đã xảy ra lỗi không xác định!' });
             }
         } finally {
             setIsLoading(false);
@@ -124,9 +135,9 @@ export default function LoginPage() {
             }
         } catch (error) {
             if (error instanceof Error) {
-                setMessage({ type: 'error', text: '❌ Lỗi: ' + error.message });
+                setMessage({ type: 'error', text: error.message });
             } else {
-                setMessage({ type: 'error', text: '❌ Đã xảy ra lỗi không xác định!' });
+                setMessage({ type: 'error', text: 'Đã xảy ra lỗi không xác định!' });
             }
         } finally {
             setIsLoading(false);
@@ -151,12 +162,6 @@ export default function LoginPage() {
                     </div>
 
                     <form className="space-y-4" onSubmit={handleSubmit}>
-                        {message.text && (
-                            <div
-                                className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                                {message.text}
-                            </div>
-                        )}
                         <div className="space-y-2">
                             <label className="ml-1 block text-sm font-bold text-moss-green">Tên đăng nhập</label>
                             <div className="relative">
@@ -259,6 +264,13 @@ export default function LoginPage() {
             </main>
 
             <Footer />
+
+            <AuthMessageModal 
+                isOpen={!!message.text} 
+                type={message.type as any} 
+                message={message.text} 
+                onClose={() => setMessage({ type: '', text: '' })} 
+            />
         </div>
     )
 }
