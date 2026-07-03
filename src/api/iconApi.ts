@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../constants/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
 import { fetchWithAuth } from './fetchClient';
 
 export interface IconItem {
@@ -9,7 +9,7 @@ export interface IconItem {
 }
 
 export const getIcons = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icon/get-all`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/icon/get-all`, {
         method: 'GET'
     });
     const res = await response.json();
@@ -17,7 +17,7 @@ export const getIcons = async () => {
 };
 
 export const createIcon = async (name: string, code: string) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icon/create`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/icon/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, code })
@@ -26,7 +26,7 @@ export const createIcon = async (name: string, code: string) => {
 };
 
 export const deleteIcon = async (id: string) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/icon/delete/${id}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/icon/delete/${id}`, {
         method: 'DELETE'
     });
     return response.json();

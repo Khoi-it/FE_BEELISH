@@ -1,72 +1,243 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import DataTableWrapper from '../components/DataTableWrapper';
+import { getVideos, createVideo, updateVideo, deleteVideo } from '../../api/videosApi';
 
 export default function Videos() {
   const [showModal, setShowModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState(1); // 1 = Info, 2 = Transcript
 
-  const [videos, setVideos] = useState([
-    { id: 'v1', title: 'Basic Greetings in English', url: 'https://youtube.com/...', upload_date: '2026-05-12', viewCount: 1542, duration: '05:30' },
-    { id: 'v2', title: 'Business English Vocabulary', url: 'https://youtube.com/...', upload_date: '2026-05-18', viewCount: 890, duration: '12:15' },
-  ]);
+  // Form State
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [duration, setDuration] = useState(0);
+  const [transcripts, setTranscripts] = useState<any[]>([]);
+
+  const fetchVideos = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getVideos();
+      setVideos(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   const columns = [
     { title: 'ID', data: 'id' },
     { title: 'Title', data: 'title' },
     { title: 'URL', data: 'url' },
     { title: 'Views', data: 'viewCount' },
-    { title: 'Duration', data: 'duration' },
+    { title: 'Duration (s)', data: 'duration' },
   ];
 
   const handleEdit = (id: string) => {
     const v = videos.find(x => x.id === id);
-    setSelectedVideo(v);
+    if (v) {
+      setSelectedVideo(v);
+      setTitle(v.title || '');
+      setUrl(v.url || '');
+      setDuration(v.duration || 0);
+      setTranscripts(v.transcripts || []);
+      setStep(1);
+      setShowModal(true);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this video?')) {
+      try {
+        await deleteVideo(id);
+        fetchVideos();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const openAddModal = () => {
+    setSelectedVideo(null);
+    setTitle('');
+    setUrl('');
+    setDuration(0);
+    setTranscripts([]);
+    setStep(1);
     setShowModal(true);
+  };
+
+  const handleSave = async () => {
+    const payload = {
+      id: selectedVideo ? selectedVideo.id : undefined,
+      title,
+      url,
+      duration: Number(duration),
+      viewCount: selectedVideo ? selectedVideo.viewCount : 0,
+      upload_date: selectedVideo ? selectedVideo.upload_date : new Date().toISOString(),
+      transcripts: transcripts.map(t => ({
+        text: t.text,
+        start: Number(t.start),
+        dur: Number(t.dur)
+      }))
+    };
+
+    try {
+      if (selectedVideo) {
+        await updateVideo(selectedVideo.id, payload);
+      } else {
+        await createVideo(payload);
+      }
+      setShowModal(false);
+      fetchVideos();
+    } catch (e) {
+      console.error('Save error', e);
+      alert('Failed to save video');
+    }
+  };
+
+  const addTranscriptRow = () => {
+    setTranscripts([...transcripts, { text: '', start: 0, dur: 0 }]);
+  };
+
+  const removeTranscriptRow = (idx: number) => {
+    setTranscripts(transcripts.filter((_, i) => i !== idx));
+  };
+
+  const updateTranscriptRow = (idx: number, field: string, value: any) => {
+    const next = [...transcripts];
+    next[idx] = { ...next[idx], [field]: value };
+    setTranscripts(next);
   };
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold m-0">Video Lessons</h2>
-        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={() => { setSelectedVideo(null); setShowModal(true); }}>
+        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={openAddModal}>
           <Plus size={18} /> Add New Video
         </button>
       </div>
 
       <div className="card p-4">
-        <DataTableWrapper data={videos} columns={columns} onEdit={handleEdit} onDelete={() => {}} />
+        {isLoading ? (
+          <div>Loading videos...</div>
+        ) : (
+          <DataTableWrapper data={videos} columns={columns} onEdit={handleEdit} onDelete={handleDelete} />
+        )}
       </div>
 
       {showModal && (
         <>
           <div className="modal-backdrop show" style={{ backgroundColor: 'rgba(40, 63, 59, 0.5)' }}></div>
           <div className="modal d-block show" tabIndex={-1}>
-            <div className="modal-dialog modal-dialog-centered">
+            <div className={`modal-dialog modal-dialog-centered ${step === 2 ? 'modal-xl' : ''}`}>
               <div className="modal-content" style={{ border: 'var(--beelish-border)', boxShadow: 'var(--beelish-shadow)' }}>
                 <div className="modal-header border-bottom border-dark border-3" style={{ backgroundColor: 'var(--beelish-primary)' }}>
                   <h5 className="modal-title fw-bold" style={{ color: 'var(--beelish-secondary)' }}>
-                    {selectedVideo ? 'Edit Video' : 'Add New Video'}
+                    {selectedVideo ? 'Edit Video' : 'Add New Video'} - Step {step} of 2
                   </h5>
                   <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
                 </div>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Title</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedVideo?.title} />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">YouTube URL</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedVideo?.url} />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Duration</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedVideo?.duration} />
-                  </div>
+                
+                <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                  {step === 1 && (
+                    <>
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">Title</label>
+                        <input type="text" className="form-control border-dark border-2" value={title} onChange={e => setTitle(e.target.value)} />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">YouTube URL (ID)</label>
+                        <input type="text" className="form-control border-dark border-2" value={url} onChange={e => setUrl(e.target.value)} />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">Duration (seconds)</label>
+                        <input type="number" className="form-control border-dark border-2" value={duration} onChange={e => setDuration(Number(e.target.value))} />
+                      </div>
+                    </>
+                  )}
+
+                  {step === 2 && (
+                    <>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h6 className="fw-bold m-0">Transcripts</h6>
+                        <button className="btn btn-sm btn-outline-primary" onClick={addTranscriptRow}>+ Add Line</button>
+                      </div>
+                      {transcripts.length === 0 ? (
+                        <div className="text-muted text-center py-4">No transcripts added yet.</div>
+                      ) : (
+                        <table className="table table-bordered align-middle">
+                          <thead className="table-light">
+                            <tr>
+                              <th style={{ width: '60%' }}>Sentence</th>
+                              <th style={{ width: '15%' }}>Start (s)</th>
+                              <th style={{ width: '15%' }}>Dur (s)</th>
+                              <th style={{ width: '10%' }}>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {transcripts.map((t, idx) => (
+                              <tr key={idx}>
+                                <td>
+                                  <textarea 
+                                    className="form-control border-dark" 
+                                    rows={1}
+                                    value={t.text} 
+                                    onChange={e => updateTranscriptRow(idx, 'text', e.target.value)} 
+                                  />
+                                </td>
+                                <td>
+                                  <input 
+                                    type="number" 
+                                    step="0.1"
+                                    className="form-control border-dark" 
+                                    value={t.start} 
+                                    onChange={e => updateTranscriptRow(idx, 'start', e.target.value)} 
+                                  />
+                                </td>
+                                <td>
+                                  <input 
+                                    type="number" 
+                                    step="0.1"
+                                    className="form-control border-dark" 
+                                    value={t.dur} 
+                                    onChange={e => updateTranscriptRow(idx, 'dur', e.target.value)} 
+                                  />
+                                </td>
+                                <td className="text-center">
+                                  <button className="btn btn-sm btn-danger" onClick={() => removeTranscriptRow(idx)}>
+                                    <Trash2 size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </>
+                  )}
                 </div>
-                <div className="modal-footer border-top border-dark border-3">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>Save</button>
+
+                <div className="modal-footer border-top border-dark border-3 justify-content-between">
+                  {step === 1 ? (
+                    <>
+                      <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                      <button type="button" className="btn btn-primary" onClick={() => setStep(2)}>Next: Transcripts &rarr;</button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>&larr; Back</button>
+                      <button type="button" className="btn btn-success fw-bold" onClick={handleSave}>Save Video</button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
