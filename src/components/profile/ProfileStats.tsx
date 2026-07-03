@@ -37,7 +37,7 @@ export default function ProfileStats() {
             try {
                 // Lấy data thô từ API
                 const response = await getStats(); 
-                const data= response.data; // Giả sử API trả về { wordsLearned, wordsToday, streakDays, bestStreak, totalXp, currentLevel, leaderboardRank, leagueName }
+                const data= response; // Giả sử API trả về { wordsLearned, wordsToday, streakDays, bestStreak, totalXp, currentLevel, leaderboardRank, leagueName }
                 
                 if (data) {
                     // MAPPING DATA: Chuyển đổi data API sang mảng StatCardProps

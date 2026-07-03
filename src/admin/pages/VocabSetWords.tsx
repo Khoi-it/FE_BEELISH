@@ -35,8 +35,8 @@ export default function VocabSetWords() {
       const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/get-words/${setId}`);
       if (response.ok) {
         const data = await response.json();
-        // The API wraps the response in an ApiResponse, so we check data.data
-        setWords(data.data || []);
+        // The API wraps the response in an ApiResponse, so we check data
+        setWords(data || []);
       } else {
         console.error('Failed to fetch words');
       }
@@ -133,10 +133,10 @@ export default function VocabSetWords() {
         fetchWords(); // Refresh words list here
       } else if (response.status === 409) {
         const result = await response.json();
-        setConflictData(result.data);
+        setConflictData(result);
         
         const allWords = new Set<string>();
-        result.data.forEach((c: any) => allWords.add(c.newWord.word));
+        result.forEach((c: any) => allWords.add(c.newWord.word));
         setSelectedConflicts(allWords);
 
         setPendingFile(file);
@@ -179,9 +179,9 @@ export default function VocabSetWords() {
         fetchWords();
       } else if (response.status === 409 && !isEdit) {
         const result = await response.json();
-        setConflictData(result.data);
+        setConflictData(result);
         const allWords = new Set<string>();
-        result.data.forEach((c: any) => allWords.add(c.newWord.word));
+        result.forEach((c: any) => allWords.add(c.newWord.word));
         setSelectedConflicts(allWords);
         setPendingActionType('manual');
         setConflictModalOpen(true);

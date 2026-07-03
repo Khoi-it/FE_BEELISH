@@ -73,7 +73,7 @@ export default function VocabularyPage() {
             const calculatedProgress = Math.round(((currentMemoryWords.length + currentClozeWords.length) / (words.length * 2)) * 100);
             
             const result = await recordStudySession(targetVocabId, newWords, xpGained, calculatedProgress, currentMemoryWords, currentClozeWords);
-            const newProgress = result.data?.learningProgress ?? Math.max(selectedDeck.learningProgress || 0, calculatedProgress);
+            const newProgress = result?.learningProgress ?? Math.max(selectedDeck.learningProgress || 0, calculatedProgress);
             
             const updateDeck = (deck: Deck) => {
                 if (String(deck.vocabID) === targetVocabId || String(deck.id) === targetVocabId) {
@@ -96,7 +96,7 @@ export default function VocabularyPage() {
             
             try {
                 const sDecks = await getSystemVocabSets();
-                actualSystemDecks = Array.isArray(sDecks) ? sDecks : (sDecks.data || []);
+                actualSystemDecks = Array.isArray(sDecks) ? sDecks : (sDecks || []);
                 setSystemDecks(actualSystemDecks);
             } catch (err) {
                 console.error('Lỗi lấy System Decks:', err);
@@ -104,7 +104,7 @@ export default function VocabularyPage() {
 
             try {
                 const cats = await getCategories();
-                const actualCategories = Array.isArray(cats) ? cats : (cats.data || []);
+                const actualCategories = Array.isArray(cats) ? cats : (cats || []);
                 setCategories(actualCategories);
             } catch (err) {
                 console.error('Lỗi lấy Categories:', err);
@@ -113,7 +113,7 @@ export default function VocabularyPage() {
             if (user) {
                 try {
                     const uDecks = await getUserVocabSets();
-                    const actualUserDecks = Array.isArray(uDecks) ? uDecks : (uDecks.data || []);
+                    const actualUserDecks = Array.isArray(uDecks) ? uDecks : (uDecks || []);
                     
                     const systemDeckIds = new Set(actualSystemDecks.map(d => String(d.id)));
                     const filteredUserDecks = actualUserDecks.filter((u: any) => !systemDeckIds.has(String(u.vocabID)));

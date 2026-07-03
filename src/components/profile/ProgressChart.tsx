@@ -24,8 +24,8 @@ export default function ProgressChart() {
             try {
                 const response = await getLastWeekStats();
                 
-                if (response?.statusCode === 200 && response?.data) {
-                    const rawData: ApiStatItem[] = response.data;
+                if (response?.statusCode === 200 && response) {
+                    const rawData: ApiStatItem[] = response;
                     
                     // Tìm giá trị lớn nhất trong tuần để làm mốc 100% chiều cao
                     const maxValue = Math.max(...rawData.map(d => d.numMemorizeNew));

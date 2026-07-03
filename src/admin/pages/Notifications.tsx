@@ -26,7 +26,7 @@ export default function Notifications() {
   const fetchHistory = async () => {
     try {
       const result = await getNotificationHistory();
-      setHistory(Array.isArray(result) ? result : result.data || []);
+      setHistory(Array.isArray(result) ? result : result || []);
     } catch (error) {
       console.error('Error fetching notification history', error);
     }
@@ -36,8 +36,8 @@ export default function Notifications() {
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/user/get-all`, { method: 'GET' });
       const result = await response.json();
-      if (response.ok && result.data) {
-        setUsers(result.data);
+      if (response.ok && result) {
+        setUsers(result);
       }
     } catch (err) {
       console.error('Lỗi khi tải danh sách người dùng', err);

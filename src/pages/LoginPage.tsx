@@ -59,19 +59,19 @@ export default function LoginPage() {
                 throw new Error(result.message || 'Sai tài khoản hoặc mật khẩu!');
             }
 
-            if (result.data && result.data.accessToken) {
-                localStorage.setItem('accessToken', result.data.accessToken);
-                if (result.data.refreshToken) {
-                    localStorage.setItem('refreshToken', result.data.refreshToken);
+            if (result && result.accessToken) {
+                localStorage.setItem('accessToken', result.accessToken);
+                if (result.refreshToken) {
+                    localStorage.setItem('refreshToken', result.refreshToken);
                 }
             } else {
                 throw new Error("Không nhận được dữ liệu xác thực từ máy chủ");
             }
 
             setMessage({ type: 'success', text: 'Đăng nhập thành công!' })
-            setUser(result.data.user);
-            if (result.data.user) {
-                localStorage.setItem('user', JSON.stringify(result.data.user));
+            setUser(result.user);
+            if (result.user) {
+                localStorage.setItem('user', JSON.stringify(result.user));
             }
 
             // Xóa form
@@ -79,7 +79,7 @@ export default function LoginPage() {
             setPassword('')
 
             // Chuyển sang trang admin hoặc trang chủ dựa vào role
-            if (result.data.user && result.data.user.roleId === 'ROLE_ADMIN') {
+            if (result.user && result.user.roleId === 'ROLE_ADMIN') {
                 navigate('/admin');
             } else {
                 navigate(ROUTES.HOME);
@@ -118,20 +118,20 @@ export default function LoginPage() {
                 throw new Error(result.message || 'Đăng nhập Google thất bại!');
             }
 
-            if (result.data && result.data.accessToken) {
-                localStorage.setItem('accessToken', result.data.accessToken);
-                if (result.data.refreshToken) {
-                    localStorage.setItem('refreshToken', result.data.refreshToken);
+            if (result && result.accessToken) {
+                localStorage.setItem('accessToken', result.accessToken);
+                if (result.refreshToken) {
+                    localStorage.setItem('refreshToken', result.refreshToken);
                 }
             }
 
             setMessage({ type: 'success', text: 'Đăng nhập thành công!' });
-            setUser(result.data.user);
-            if (result.data.user) {
-                localStorage.setItem('user', JSON.stringify(result.data.user));
+            setUser(result.user);
+            if (result.user) {
+                localStorage.setItem('user', JSON.stringify(result.user));
             }
 
-            if (result.data.user && result.data.user.roleId === 'ROLE_ADMIN') {
+            if (result.user && result.user.roleId === 'ROLE_ADMIN') {
                 navigate('/admin');
             } else {
                 navigate(ROUTES.HOME);

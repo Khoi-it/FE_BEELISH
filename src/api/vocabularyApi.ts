@@ -7,7 +7,7 @@ export const getUserVocabSets = async () => {
     });
     if (!response.ok) throw new Error('Failed to fetch user vocab sets');
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const getSystemVocabSets = async () => {
@@ -19,7 +19,7 @@ export const getSystemVocabSets = async () => {
     });
     if (!response.ok) throw new Error('Failed to fetch system vocab sets');
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const getWordsByDeckId = async (setId: string | number) => {
@@ -28,7 +28,7 @@ export const getWordsByDeckId = async (setId: string | number) => {
     });
     if (!response.ok) throw new Error('Failed to fetch words');
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const getCategories = async () => {
@@ -40,7 +40,7 @@ export const getCategories = async () => {
     });
     if (!response.ok) throw new Error('Failed to fetch categories');
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const recordStudySession = async (vocabId: string, newWords: number, xpGained: number, progress: number, memoryWords: string[], clozeWords: string[]) => {

@@ -24,7 +24,7 @@ export default function VocabSets() {
   const fetchIconsList = async () => {
     try {
       const result = await getIcons();
-      setIconsList(Array.isArray(result) ? result : result.data || []);
+      setIconsList(Array.isArray(result) ? result : result || []);
     } catch (error) {
       console.error('Error fetching icons', error);
     }
@@ -35,7 +35,7 @@ export default function VocabSets() {
       const response = await fetchWithAuth(`${API_BASE_URL}/api/vocab-set/get-all`);
       if (response.ok) {
         const data = await response.json();
-        setSets(Array.isArray(data.data) ? data.data : data || []);
+        setSets(Array.isArray(data) ? data : data || []);
       } else {
         console.error('Failed to fetch vocab sets');
       }

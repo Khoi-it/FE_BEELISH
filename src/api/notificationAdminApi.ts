@@ -15,7 +15,7 @@ export const getNotificationHistory = async () => {
         method: 'GET'
     });
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const sendNotification = async (payload: { targetType: string, targetUserId?: string, title: string, message: string }) => {

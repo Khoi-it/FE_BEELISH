@@ -31,7 +31,7 @@ export default function AppHeader() {
     useEffect(() => {
         if (isLoggedIn) {
             getNotifications().then(res => {
-                setNotifications(Array.isArray(res) ? res : res.data || [])
+                setNotifications(Array.isArray(res) ? res : res || [])
             }).catch(console.error)
         }
     }, [isLoggedIn])

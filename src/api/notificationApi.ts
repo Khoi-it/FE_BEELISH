@@ -15,7 +15,7 @@ export const getNotifications = async () => {
         method: 'GET'
     });
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const markAllAsRead = async () => {

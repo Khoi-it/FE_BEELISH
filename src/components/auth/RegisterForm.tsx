@@ -94,12 +94,12 @@ export default function RegisterForm() {
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Đăng nhập Google thất bại!');
         
-        localStorage.setItem('accessToken', result.data.accessToken);
-        if (result.data.refreshToken) localStorage.setItem('refreshToken', result.data.refreshToken);
-        setUser(result.data.user);
-        if (result.data.user) localStorage.setItem('user', JSON.stringify(result.data.user));
+        localStorage.setItem('accessToken', result.accessToken);
+        if (result.refreshToken) localStorage.setItem('refreshToken', result.refreshToken);
+        setUser(result.user);
+        if (result.user) localStorage.setItem('user', JSON.stringify(result.user));
         
-        navigate(result.data.user.roleId === 'ROLE_ADMIN' ? '/admin' : ROUTES.HOME);
+        navigate(result.user.roleId === 'ROLE_ADMIN' ? '/admin' : ROUTES.HOME);
     } catch (error: any) {
         setMessage({ type: 'error', text: '❌ Lỗi: ' + error.message });
     } finally {

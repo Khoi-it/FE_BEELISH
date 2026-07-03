@@ -8,7 +8,7 @@ export const getVideos = async (params?: Record<string, string>) => {
     });
     if (!response.ok) throw new Error('Failed to fetch videos');
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const getVideoById = async (id: string | number) => {
@@ -17,7 +17,7 @@ export const getVideoById = async (id: string | number) => {
     });
     if (!response.ok) throw new Error('Failed to fetch video');
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const getVideoTranscript = async (videoId: string) => {
@@ -27,7 +27,7 @@ export const getVideoTranscript = async (videoId: string) => {
     });
     if (!response.ok) throw new Error('Failed to fetch transcript');
     const res = await response.json();
-    let data = res.data || res;
+    let data = res;
     if (typeof data === 'string') {
         try {
             data = JSON.parse(data);

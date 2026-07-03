@@ -28,8 +28,8 @@ export default function Users() {
         }
       });
       const result = await response.json();
-      if (response.ok && result.data) {
-        setUsers(result.data);
+      if (response.ok && result) {
+        setUsers(result);
       } else {
         setError(result.message || 'Lỗi khi tải danh sách người dùng');
       }

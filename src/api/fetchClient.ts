@@ -59,8 +59,8 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
             }
 
             const refreshData = await refreshResponse.json();
-            const newAccessToken = refreshData.data.accessToken;
-            const newRefreshToken = refreshData.data.refreshToken;
+            const newAccessToken = refreshData.accessToken;
+            const newRefreshToken = refreshData.refreshToken;
 
             localStorage.setItem('accessToken', newAccessToken);
             if (newRefreshToken) {

@@ -13,7 +13,7 @@ export const getIcons = async () => {
         method: 'GET'
     });
     const res = await response.json();
-    return res.data || res;
+    return res;
 };
 
 export const createIcon = async (name: string, code: string) => {

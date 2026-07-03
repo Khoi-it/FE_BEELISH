@@ -27,8 +27,8 @@ export default function Icons() {
       const result = await getIcons();
       if (Array.isArray(result)) {
         setIcons(result);
-      } else if (result && result.data) {
-        setIcons(result.data);
+      } else if (result && result) {
+        setIcons(result);
       } else {
         setError(result.message || 'Lỗi khi tải danh sách icon');
       }
