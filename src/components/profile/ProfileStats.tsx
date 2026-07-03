@@ -44,27 +44,26 @@ export default function ProfileStats() {
                     const mappedStats: StatCardProps[] = [
                         { 
                             label: "Số từ đã học", 
-                            // Dùng toLocaleString() để format số (vd: 1240 -> 1,240)
-                            value: data.totalLearnedWords.toLocaleString(), 
-                            subValue: `+${data.totalWordToday} hôm nay`, 
+                            value: (data.totalLearnedWords ?? 0).toLocaleString(), 
+                            subValue: `+${data.totalWordToday ?? 0} hôm nay`, 
                             subValueClassName: "text-tertiary" 
                         },
                         { 
                             label: "Ngày học liên tiếp", 
-                            value: data.currentStreak, 
+                            value: data.currentStreak ?? 0, 
                             accentClassName: "text-[#FF9F1C]", 
-                            subValue: `Kỷ lục: ${data.longestStreak} ngày` 
+                            subValue: `Kỷ lục: ${data.longestStreak ?? 0} ngày` 
                         },
                         { 
                             label: "Tổng XP", 
-                            value: data.totalXp.toLocaleString(), 
-                            subValue: `Level ${data.level}`, 
+                            value: (data.totalXp ?? 0).toLocaleString(), 
+                            subValue: data.level ? `Level ${data.level}` : 'Level 1', 
                             subValueClassName: "text-[#ffbf00]" 
                         },
                         { 
                             label: "Thứ hạng", 
-                            value: `#${data.rank}`, 
-                            subValue: data.rank 
+                            value: data.rank ? `#${data.rank}` : '---', 
+                            subValue: data.rank ? `Hạng ${data.rank}` : 'Chưa xếp hạng' 
                         }
                     ];
 

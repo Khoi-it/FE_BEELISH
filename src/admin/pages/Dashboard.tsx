@@ -11,6 +11,8 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
+import { useEffect, useState } from 'react';
+import { AdminDashboardData, getAdminDashboardData } from '../../api/adminDashboardApi';
 
 ChartJS.register(
   CategoryScale,
@@ -24,19 +26,52 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
+  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getAdminDashboardData()
+      .then((res) => {
+        setData(res);
+      })
+      .catch((err) => {
+        console.error("Failed to load dashboard data", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="p-5 text-center fw-bold text-muted">Loading Dashboard...</div>;
+  }
+
+  if (!data) {
+    return <div className="p-5 text-center text-danger fw-bold">Failed to load Dashboard data</div>;
+  }
+
   const kpis = [
-    { title: 'Total Users', value: '1,248', icon: <Users size={24} className="text-primary" />, color: 'var(--beelish-primary)' },
-    { title: 'Active Learners', value: '892', icon: <Library size={24} className="text-success" />, color: 'var(--beelish-success)' },
-    { title: 'Total Vocabulary', value: '5,024', icon: <BookOpen size={24} className="text-danger" />, color: 'var(--beelish-danger)' },
-    { title: 'Video Lessons', value: '156', icon: <Video size={24} className="text-secondary" />, color: 'var(--beelish-secondary)' },
+    { title: 'Total Users', value: data.totalUsers.toLocaleString(), icon: <Users size={24} className="text-primary" />, color: 'var(--beelish-primary)' },
+    { title: 'Active Learners', value: data.activeLearners.toLocaleString(), icon: <Library size={24} className="text-success" />, color: 'var(--beelish-success)' },
+    { title: 'Total Vocab Sets', value: data.totalVocabulary.toLocaleString(), icon: <BookOpen size={24} className="text-danger" />, color: 'var(--beelish-danger)' },
+    { title: 'Video Lessons', value: data.videoLessons.toLocaleString(), icon: <Video size={24} className="text-secondary" />, color: 'var(--beelish-secondary)' },
   ];
 
+  // For Line Chart, we assume the trend is for the last 7 days.
+  const today = new Date();
+  const labels = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    labels.push(d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }));
+  }
+
   const lineChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+    labels: labels,
     datasets: [
       {
         label: 'Active Users',
-        data: [650, 720, 810, 790, 850, 920, 892],
+        data: data.userActivityTrend || [0, 0, 0, 0, 0, 0, 0],
         borderColor: '#ffbf00',
         backgroundColor: 'rgba(255, 191, 0, 0.5)',
         borderWidth: 3,
@@ -49,16 +84,20 @@ export default function Dashboard() {
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
-      title: { display: true, text: 'User Activity Trend' },
+      title: { display: true, text: 'User Activity Trend (Last 7 Days)' },
     },
   };
 
+  // For Doughnut Chart Demographics
+  const demoLabels = Object.keys(data.userDemographics || {});
+  const demoValues = Object.values(data.userDemographics || {});
+  
   const doughnutData = {
-    labels: ['Beginner', 'Intermediate', 'Advanced'],
+    labels: demoLabels.length > 0 ? demoLabels : ['No Data'],
     datasets: [
       {
-        data: [45, 35, 20],
-        backgroundColor: ['#679436', '#ffbf00', '#ef4444'],
+        data: demoValues.length > 0 ? demoValues : [1],
+        backgroundColor: ['#679436', '#ffbf00', '#ef4444', '#a8a29e'],
         borderColor: '#283F3B',
         borderWidth: 2,
       },
@@ -98,7 +137,7 @@ export default function Dashboard() {
         </div>
         <div className="col-12 col-lg-4">
           <div className="card p-3 h-100 d-flex flex-column align-items-center justify-content-center">
-            <h5 className="fw-bold mb-3 w-100 text-center">User Demographics</h5>
+            <h5 className="fw-bold mb-3 w-100 text-center">Weekly Activity</h5>
             <div style={{ maxWidth: '250px' }}>
               <Doughnut data={doughnutData} />
             </div>
@@ -106,38 +145,40 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Leaderboard */}
       <div className="card p-4">
-        <h5 className="fw-bold mb-3">Recent Activity</h5>
+        <h5 className="fw-bold mb-3">User Leaderboard (Top 10)</h5>
         <div className="table-responsive">
-          <table className="table">
+          <table className="table align-middle">
             <thead>
               <tr>
+                <th>Rank</th>
                 <th>User</th>
-                <th>Action</th>
-                <th>Item</th>
-                <th>Time</th>
+                <th>Total XP</th>
+                <th>Title</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="fw-bold">John Doe</td>
-                <td><span className="badge bg-success border border-dark">Completed</span></td>
-                <td>Basic Greetings - Video</td>
-                <td className="text-muted">2 mins ago</td>
-              </tr>
-              <tr>
-                <td className="fw-bold">Jane Smith</td>
-                <td><span className="badge bg-primary border border-dark text-dark">Started</span></td>
-                <td>Colors & Shapes - Vocab Set</td>
-                <td className="text-muted">15 mins ago</td>
-              </tr>
-              <tr>
-                <td className="fw-bold">Admin</td>
-                <td><span className="badge bg-secondary border border-dark">Added</span></td>
-                <td>New Word: "Exacerbate"</td>
-                <td className="text-muted">1 hour ago</td>
-              </tr>
+              {data.topUsers && data.topUsers.length > 0 ? (
+                data.topUsers.map((user, idx) => (
+                  <tr key={idx}>
+                    <td className="fw-bold">
+                      {user.rankPosition === 1 ? '🥇 1' : user.rankPosition === 2 ? '🥈 2' : user.rankPosition === 3 ? '🥉 3' : user.rankPosition}
+                    </td>
+                    <td className="fw-bold">{user.fullName}</td>
+                    <td className="text-warning fw-bold">{user.totalXP} XP</td>
+                    <td>
+                      <span className={`badge border border-dark ${user.rankPosition === 1 ? 'bg-primary' : user.rankPosition === 2 ? 'bg-warning text-dark' : user.rankPosition === 3 ? 'bg-danger' : 'bg-secondary'}`}>
+                        {user.rankName}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="text-center text-muted py-3">No users found</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

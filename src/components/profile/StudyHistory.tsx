@@ -54,7 +54,7 @@ export default function StudyHistory() {
             try {
                 const response = await getStudyHistory();
                 
-                if (response?.statusCode === 200 && response?.content) {
+                if (response && response.content) {
                     const contentList: ApiHistoryDailyItem[] = response.content;
                     
                     if (contentList.length === 0) {

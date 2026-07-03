@@ -33,8 +33,8 @@ export default function AppHeader() {
     useEffect(() => {
         const fetchStats = () => {
             getStats().then(res => {
-                if (res?.data) {
-                    setUserStats(res.data)
+                if (res) {
+                    setUserStats(res)
                 }
             }).catch(console.error)
         };

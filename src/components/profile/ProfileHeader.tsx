@@ -1,7 +1,17 @@
 import { useAuth } from "../../contexts/AuthContext";
+import { useState, useEffect } from 'react';
+import { getStats } from '../../api/userApi';
 
 export default function ProfileHeader({ onEditClick }: { onEditClick: () => void }) {
     const { user, logout } = useAuth();
+    const [userStats, setUserStats] = useState<{ currentStreak?: number, rank?: string | null } | null>(null);
+
+    useEffect(() => {
+        getStats().then(res => {
+            if (res) setUserStats(res);
+        }).catch(console.error);
+    }, []);
+
     const displayName = user?.fullName || 'Học viên Beelish';
     console.log(user);
     return (
@@ -41,14 +51,14 @@ export default function ProfileHeader({ onEditClick }: { onEditClick: () => void
                         <span className="material-symbols-outlined text-red-500" style={{ fontVariationSettings: '"FILL" 1' }}>
                             local_fire_department
                         </span>
-                        <span className="font-black text-sm uppercase">15 Days Streak</span>
+                        <span className="font-black text-sm uppercase">{userStats?.currentStreak ?? 0} Days Streak</span>
                     </div>
 
                     <div className="flex items-center gap-2 rounded-xl border-2 border-[#283f3b] bg-[#fcfbf8] px-4 py-2 shadow-[2px_2px_0px_0px_#283f3b]">
                         <span className="material-symbols-outlined text-[#ffbf00]" style={{ fontVariationSettings: '"FILL" 1' }}>
                             stars
                         </span>
-                        <span className="font-black text-sm uppercase">Gold League</span>
+                        <span className="font-black text-sm uppercase">{userStats?.rank ? `Hạng ${userStats.rank}` : 'Chưa xếp hạng'}</span>
                     </div>
                 </div>
             </div>

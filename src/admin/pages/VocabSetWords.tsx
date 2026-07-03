@@ -25,6 +25,7 @@ export default function VocabSetWords() {
   // Mock data for now
   const [words, setWords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     fetchWords();
@@ -204,7 +205,7 @@ export default function VocabSetWords() {
         </button>
         <h2 className="fw-bold m-0 flex-grow-1">Words in Set: {setId}</h2>
         
-        <button className="btn btn-info text-white d-flex align-items-center gap-2" onClick={handleDownloadTemplate}>
+        <button className="btn btn-info text-white d-flex align-items-center gap-2" onClick={downloadTemplate}>
           <Download size={18} /> Template
         </button>
         <button className="btn btn-success d-flex align-items-center gap-2" onClick={handleUploadClick}>

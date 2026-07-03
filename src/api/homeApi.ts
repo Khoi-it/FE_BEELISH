@@ -5,12 +5,12 @@ export const getGoalProgress = async () => {
     const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.HOME}/dashboard`, { method: 'GET' });
     if (!response.ok) throw new Error('Failed to fetch goal progress');
     const res = await response.json();
-    return res.progressPercent || res;
+    return res.progressPercent ?? 0;
 };
 
 export const getContinueLearning = async () => {
     const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.HOME}/dashboard`, { method: 'GET' });
     if (!response.ok) throw new Error('Failed to fetch continue learning data');
     const res = await response.json();
-    return res.currentVideo || res;
+    return res.currentVideo ?? null;
 };
