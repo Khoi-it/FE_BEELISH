@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { getNotificationHistory, sendNotification, NotificationLog } from '../../api/notificationAdminApi';
-import { API_BASE_URL } from '../../constants/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
 import { fetchWithAuth } from '../../api/fetchClient';
 
 export default function Notifications() {
@@ -34,7 +35,7 @@ export default function Notifications() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/user/get-all`, { method: 'GET' });
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/user/get-all`, { method: 'GET' });
       const result = await response.json();
       if (response.ok && result) {
         setUsers(result);

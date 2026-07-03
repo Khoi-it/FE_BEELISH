@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../constants/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
 import { fetchWithAuth } from './fetchClient';
 
 export interface NotificationItem {
@@ -11,7 +11,7 @@ export interface NotificationItem {
 }
 
 export const getNotifications = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/notification/get-all`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.NOTIFICATION}/get-all`, {
         method: 'GET'
     });
     const res = await response.json();
@@ -19,7 +19,7 @@ export const getNotifications = async () => {
 };
 
 export const markAllAsRead = async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/notification/read`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.NOTIFICATION}/read`, {
         method: 'PUT'
     });
     return response.json();

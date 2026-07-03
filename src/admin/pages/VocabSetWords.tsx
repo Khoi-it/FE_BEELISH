@@ -3,7 +3,7 @@ import { Plus, ArrowLeft, Upload, Download } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { fetchWithAuth } from '../../api/fetchClient';
-import { API_BASE_URL } from '../../constants/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
 
 export default function VocabSetWords() {
   const { id: setId } = useParams();
@@ -32,7 +32,7 @@ export default function VocabSetWords() {
 
   const fetchWords = async () => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/get-words/${setId}`);
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/vocab-set/get-words/${setId}`);
       if (response.ok) {
         const data = await response.json();
         // The API wraps the response in an ApiResponse, so we check data
@@ -69,7 +69,7 @@ export default function VocabSetWords() {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/delete-word/${selectedWord.id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/vocab-set/delete-word/${selectedWord.id}`, {
         method: 'DELETE'
       });
       if (response.ok) {
@@ -84,10 +84,10 @@ export default function VocabSetWords() {
     }
   };
 
-  const handleDownloadTemplate = async () => {
+  const downloadTemplate = async () => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/excel-template`);
-      if (!response.ok) throw new Error('Failed to download');
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/vocab-set/excel-template`);
+      if (!response.ok) {throw new Error('Failed to download');}
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -122,7 +122,8 @@ export default function VocabSetWords() {
     }
     
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/vocab-set/import-words/${setId}?action=${action}`, {
+      setImporting(true);
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/vocab-set/import-words/${setId}?action=${action}`, {
         method: 'POST',
         body: formData,
       });
@@ -147,6 +148,8 @@ export default function VocabSetWords() {
       }
     } catch (error) {
       console.error('Upload failed', error);
+    } finally {
+        setImporting(false);
     }
   };
 
@@ -162,11 +165,11 @@ export default function VocabSetWords() {
   const handleSaveWord = async (action: string = 'check') => {
     try {
       const isEdit = !!selectedWord;
-      const url = isEdit 
-        ? `${API_BASE_URL}/api/admin/vocab-set/update-word/${selectedWord.id}`
-        : `${API_BASE_URL}/api/admin/vocab-set/create-word/${setId}?action=${action}`;
+      const url = selectedWord 
+        ? `${API_BASE_URL}${API_ENDPOINTS.ADMIN}/vocab-set/update-word/${selectedWord.id}`
+        : `${API_BASE_URL}${API_ENDPOINTS.ADMIN}/vocab-set/create-word/${setId}?action=${action}`;
       
-      const method = isEdit ? 'PUT' : 'POST';
+      const method = selectedWord ? 'PUT' : 'POST';
 
       const response = await fetchWithAuth(url, {
         method,

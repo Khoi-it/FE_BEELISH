@@ -5,6 +5,7 @@ import textImage from '../../assets/text.png'
 import {ROUTES} from '../../constants/routes'
 import {useAuth} from "../../contexts/AuthContext.tsx";
 import { getNotifications, markAllAsRead, NotificationItem } from '../../api/notificationApi';
+import { getStats } from '../../api/userApi';
 
 const navItems = [
     {label: 'Tổng quan', route: ROUTES.HOME},
@@ -19,6 +20,7 @@ export default function AppHeader() {
 
     const [notifications, setNotifications] = useState<NotificationItem[]>([])
     const [showNotifications, setShowNotifications] = useState(false)
+    const [userStats, setUserStats] = useState<{ currentStreak?: number, totalXp?: number } | null>(null)
     const unreadCount = notifications.filter(n => !(n.read ?? (n as any).isRead)).length
 
     useEffect(() => {
@@ -29,10 +31,24 @@ export default function AppHeader() {
     }, [])
 
     useEffect(() => {
+        const fetchStats = () => {
+            getStats().then(res => {
+                if (res?.data) {
+                    setUserStats(res.data)
+                }
+            }).catch(console.error)
+        };
+
         if (isLoggedIn) {
             getNotifications().then(res => {
                 setNotifications(Array.isArray(res) ? res : res || [])
             }).catch(console.error)
+
+            fetchStats();
+            
+            // Listen for stats update from other components
+            window.addEventListener('userStatsUpdated', fetchStats);
+            return () => window.removeEventListener('userStatsUpdated', fetchStats);
         }
     }, [isLoggedIn])
 
@@ -90,14 +106,14 @@ export default function AppHeader() {
                             className="hidden sm:flex items-center gap-1.5 bg-white border-3 border-black ring-2 ring-black px-2 md:px-3 py-1.5 rounded-xl font-bold shadow-[4px_4px_0px_0px_#283F3B] h-10 md:h-11">
                           <span
                               className="material-symbols-outlined text-orange-500 fill-1 text-xl">local_fire_department</span>
-                            <span className="text-sm hidden md:inline">12 Ngày</span>
+                            <span className="text-sm hidden md:inline">{userStats?.currentStreak || 0} Ngày</span>
                         </div>
 
                         {/*XP*/}
                         <div
                             className="hidden sm:flex items-center gap-1.5 bg-primary border-3 border-black ring-2 ring-black px-2 md:px-3 py-1.5 rounded-xl font-bold shadow-[4px_4px_0px_0px_#283F3B] h-10 md:h-11">
                             <span className="material-symbols-outlined text-xl">stars</span>
-                            <span className="text-sm hidden md:inline">1,240 XP</span>
+                            <span className="text-sm hidden md:inline">{(userStats?.totalXp || 0).toLocaleString()} XP</span>
                         </div>
 
                         {/*Notification*/}

@@ -5,7 +5,7 @@ import { ROUTES } from '../constants/routes'
 import { useAuth } from "../contexts/AuthContext.tsx";
 import Footer from '../components/layout/Footer.tsx';
 import { useGoogleLogin } from '@react-oauth/google';
-import { API_BASE_URL } from '../constants/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
 import AuthMessageModal from '../components/auth/AuthMessageModal';
 
 export default function LoginPage() {
@@ -42,7 +42,7 @@ export default function LoginPage() {
         setIsLoading(true)
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export default function LoginPage() {
         setMessage({ type: '', text: '' });
         try {
             const token = credentialResponse.access_token || credentialResponse.credential;
-            const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/google`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { fetchWithAuth } from '../../api/fetchClient';
-import { API_BASE_URL } from '../../constants/api';
+import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
 import { getIcons, IconItem } from '../../api/iconApi';
 
 export default function VocabSets() {
@@ -32,7 +32,7 @@ export default function VocabSets() {
 
   const fetchSets = async () => {
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/vocab-set/get-all`);
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}/get-all`);
       if (response.ok) {
         const data = await response.json();
         setSets(Array.isArray(data) ? data : data || []);
@@ -64,6 +64,9 @@ export default function VocabSets() {
   const handleEdit = (id: string) => {
     const s = sets.find(x => x.id === id);
     setSelectedSet(s);
+    setTitle(s?.title || '');
+    setCategoryID(s?.categoryID || '');
+    setIcon(s?.icon || '');
     setShowModal(true);
   };
 
@@ -73,16 +76,62 @@ export default function VocabSets() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setSets(sets.filter(x => x.id !== selectedSet.id));
+  const confirmDelete = async () => {
+    if (!selectedSet) return;
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}/delete/${selectedSet.id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        fetchSets();
+      }
+    } catch (e) {
+      console.error(e);
+    }
     setShowDeleteModal(false);
   };
+
+  const handleSave = async () => {
+    const payload = { title, categoryID: Number(categoryID), icon };
+    try {
+      let response;
+      if (selectedSet) {
+        response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}/update/${selectedSet.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.VOCAB_SETS}/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      if (response.ok) {
+        fetchSets();
+        setShowModal(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const [title, setTitle] = useState('');
+  const [categoryID, setCategoryID] = useState<number | string>('');
+  const [icon, setIcon] = useState('');
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold m-0">Vocabulary Sets</h2>
-        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={() => { setSelectedSet(null); setShowModal(true); }}>
+        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={() => { 
+          setSelectedSet(null); 
+          setTitle('');
+          setCategoryID('');
+          setIcon('');
+          setShowModal(true); 
+        }}>
           <Plus size={18} /> Add New Set
         </button>
       </div>
@@ -113,19 +162,19 @@ export default function VocabSets() {
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label fw-bold">Title</label>
-                    <input type="text" className="form-control border-dark border-2" defaultValue={selectedSet?.title} />
+                    <input type="text" className="form-control border-dark border-2" value={title} onChange={(e) => setTitle(e.target.value)} />
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold">Category ID</label>
-                    <input type="number" className="form-control border-dark border-2" defaultValue={selectedSet?.categoryID} />
+                    <input type="number" className="form-control border-dark border-2" value={categoryID} onChange={(e) => setCategoryID(e.target.value)} />
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold">Icon Name</label>
-                    <select className="form-select border-dark border-2" defaultValue={selectedSet?.icon || ''}>
+                    <select className="form-select border-dark border-2" value={icon} onChange={(e) => setIcon(e.target.value)}>
                       <option value="">-- Chọn Icon --</option>
-                      {iconsList.map(icon => (
-                        <option key={icon.id} value={icon.code}>
-                          {icon.name} ({icon.code})
+                      {iconsList.map(i => (
+                        <option key={i.id} value={i.code}>
+                          {i.name} ({i.code})
                         </option>
                       ))}
                     </select>
@@ -133,7 +182,7 @@ export default function VocabSets() {
                 </div>
                 <div className="modal-footer border-top border-dark border-3">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>Save</button>
+                  <button type="button" className="btn btn-primary" onClick={handleSave}>Save</button>
                 </div>
               </div>
             </div>
