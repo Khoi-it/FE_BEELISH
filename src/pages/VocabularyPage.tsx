@@ -85,6 +85,9 @@ export default function VocabularyPage() {
             setUserDecks(prev => prev.map(updateDeck));
             setSystemDecks(prev => prev.map(updateDeck));
             setSelectedDeck(prev => prev ? updateDeck(prev) : null);
+
+            // Notify other components (like AppHeader) that stats have been updated
+            window.dispatchEvent(new Event('userStatsUpdated'));
         } catch (err) {
             console.error('Lỗi lưu phiên học:', err);
         }

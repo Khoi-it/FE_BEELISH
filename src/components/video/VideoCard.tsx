@@ -60,12 +60,13 @@ const formatDuration = (duration: string | number) => {
 };
 
 export default function VideoCard({
+  id,
   url,
   duration,
   title,
   viewCount,
   upload_date,
-}: { url: string, duration: string | number, title: string, viewCount: string | number, upload_date: string }) {
+}: { id: string | number, url: string, duration: string | number, title: string, viewCount: string | number, upload_date: string }) {
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const imageSrc = getYoutubeThumbnail(url);
@@ -84,7 +85,7 @@ export default function VideoCard({
     <>
       <Link
         to={ROUTES.DICTATION}
-        state={{ videoId }}
+        state={{ videoId, dbId: id }}
         onClick={(e) => {
           if (!user) {
             e.preventDefault();

@@ -37,3 +37,31 @@ export const getVideoTranscript = async (videoId: string) => {
     }
     return data;
 };
+
+export const createVideo = async (data: any) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/video/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to create video');
+    return response.json();
+};
+
+export const updateVideo = async (id: string, data: any) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/video/update/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to update video');
+    return response.json();
+};
+
+export const deleteVideo = async (id: string) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.ADMIN}/video/delete/${id}`, {
+        method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete video');
+    return response.json();
+};

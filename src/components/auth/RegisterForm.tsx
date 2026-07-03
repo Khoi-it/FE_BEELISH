@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { API_BASE_URL } from '../../constants/api'
+import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { useGoogleLogin } from '@react-oauth/google';
@@ -35,7 +35,7 @@ export default function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default function RegisterForm() {
   const handleResendEmail = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/resend-verification`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email }),
@@ -86,7 +86,7 @@ export default function RegisterForm() {
     setIsLoading(true);
     try {
         const token = credentialResponse.access_token || credentialResponse.credential;
-        const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/google`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ idToken: token }),
