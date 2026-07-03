@@ -3,6 +3,25 @@ import { Plus, Trash2 } from 'lucide-react';
 import DataTableWrapper from '../components/DataTableWrapper';
 import { getVideos, createVideo, updateVideo, deleteVideo } from '../../api/videosApi';
 
+const TimeInput = ({ value, onChange }: { value: number, onChange: (val: number) => void }) => {
+  const h = Math.floor(value / 3600);
+  const m = Math.floor((value % 3600) / 60);
+  const s = value % 60;
+
+  return (
+    <div>
+      <div className="d-flex gap-1 align-items-center">
+        <input type="number" min="0" placeholder="HH" className="form-control border-dark p-1 text-center" style={{ width: '45px', fontSize: '0.8rem' }} value={h === 0 ? '' : h} onChange={e => onChange((Number(e.target.value) || 0) * 3600 + m * 60 + s)} />
+        <span className="fw-bold">:</span>
+        <input type="number" min="0" max="59" placeholder="MM" className="form-control border-dark p-1 text-center" style={{ width: '45px', fontSize: '0.8rem' }} value={h === 0 && m === 0 ? '' : m} onChange={e => onChange(h * 3600 + (Number(e.target.value) || 0) * 60 + s)} />
+        <span className="fw-bold">:</span>
+        <input type="number" min="0" max="59" step="0.1" placeholder="SS" className="form-control border-dark p-1 text-center" style={{ width: '55px', fontSize: '0.8rem' }} value={value === 0 && s === 0 ? '' : Number(s.toFixed(1))} onChange={e => onChange(h * 3600 + m * 60 + (Number(e.target.value) || 0))} />
+      </div>
+      <div className="text-muted mt-1 text-center" style={{ fontSize: '10px' }}>({Number(value).toFixed(1)}s)</div>
+    </div>
+  );
+};
+
 export default function Videos() {
   const [showModal, setShowModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
@@ -15,6 +34,14 @@ export default function Videos() {
   const [url, setUrl] = useState('');
   const [duration, setDuration] = useState(0);
   const [transcripts, setTranscripts] = useState<any[]>([]);
+
+  const durHours = Math.floor(duration / 3600);
+  const durMinutes = Math.floor((duration % 3600) / 60);
+  const durSeconds = duration % 60;
+
+  const handleDurationChange = (h: number, m: number, s: number) => {
+    setDuration((h || 0) * 3600 + (m || 0) * 60 + (s || 0));
+  };
 
   const fetchVideos = async () => {
     setIsLoading(true);
@@ -159,8 +186,15 @@ export default function Videos() {
                         <input type="text" className="form-control border-dark border-2" value={url} onChange={e => setUrl(e.target.value)} />
                       </div>
                       <div className="mb-3">
-                        <label className="form-label fw-bold">Duration (seconds)</label>
-                        <input type="number" className="form-control border-dark border-2" value={duration} onChange={e => setDuration(Number(e.target.value))} />
+                        <label className="form-label fw-bold">Duration (HH:MM:SS)</label>
+                        <div className="d-flex gap-2 align-items-center">
+                          <input type="number" min="0" placeholder="HH" className="form-control border-dark border-2" style={{ width: '80px' }} value={durHours === 0 ? '' : durHours} onChange={e => handleDurationChange(Number(e.target.value), durMinutes, durSeconds)} />
+                          <span className="fw-bold">:</span>
+                          <input type="number" min="0" max="59" placeholder="MM" className="form-control border-dark border-2" style={{ width: '80px' }} value={durMinutes === 0 && durHours === 0 ? '' : durMinutes} onChange={e => handleDurationChange(durHours, Number(e.target.value), durSeconds)} />
+                          <span className="fw-bold">:</span>
+                          <input type="number" min="0" max="59" placeholder="SS" className="form-control border-dark border-2" style={{ width: '80px' }} value={durSeconds === 0 && duration === 0 ? '' : durSeconds} onChange={e => handleDurationChange(durHours, durMinutes, Number(e.target.value))} />
+                          <span className="ms-3 text-muted" style={{ fontSize: '0.85rem' }}>(Tổng: {duration} giây)</span>
+                        </div>
                       </div>
                     </>
                   )}
@@ -177,8 +211,8 @@ export default function Videos() {
                         <table className="table table-bordered align-middle">
                           <thead className="table-light">
                             <tr>
-                              <th style={{ width: '60%' }}>Sentence</th>
-                              <th style={{ width: '15%' }}>Start (s)</th>
+                              <th style={{ width: '50%' }}>Sentence</th>
+                              <th style={{ width: '25%' }}>Start (HH:MM:SS)</th>
                               <th style={{ width: '15%' }}>Dur (s)</th>
                               <th style={{ width: '10%' }}>Action</th>
                             </tr>
@@ -195,13 +229,7 @@ export default function Videos() {
                                   />
                                 </td>
                                 <td>
-                                  <input 
-                                    type="number" 
-                                    step="0.1"
-                                    className="form-control border-dark" 
-                                    value={t.start} 
-                                    onChange={e => updateTranscriptRow(idx, 'start', e.target.value)} 
-                                  />
+                                  <TimeInput value={Number(t.start) || 0} onChange={val => updateTranscriptRow(idx, 'start', val)} />
                                 </td>
                                 <td>
                                   <input 
