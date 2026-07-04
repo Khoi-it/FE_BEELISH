@@ -7,6 +7,7 @@ import WorkspaceCard from '../components/dictation/WorkspaceCard'
 import TranscriptCard, { TranscriptItem } from '../components/dictation/TranscriptCard'
 import Footer from '../components/layout/Footer.js'
 import { getVideoTranscript } from '../api/videosApi'
+import { recordStudyDay } from '../api/userApi'
 
 export default function DictationPage() {
   const location = useLocation();
@@ -77,6 +78,17 @@ export default function DictationPage() {
 
   const activeTranscript = transcripts[currentSegmentIndex] || null;
   const isCompleted = transcripts.length > 0 && currentSegmentIndex >= transcripts.length;
+
+  const [streakRecorded, setStreakRecorded] = useState(false);
+
+  useEffect(() => {
+    if (isCompleted && !streakRecorded) {
+      setStreakRecorded(true);
+      recordStudyDay(0).then(() => {
+        window.dispatchEvent(new Event('userStatsUpdated'));
+      }).catch(console.error);
+    }
+  }, [isCompleted, streakRecorded]);
 
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
 

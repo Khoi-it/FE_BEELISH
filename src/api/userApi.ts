@@ -47,3 +47,11 @@ export const getLastWeekStats= async () => {
     if (!response.ok) throw new Error('Failed to fetch last week stats');
     return response.json();
 }
+
+export const recordStudyDay = async (newWordsMemorized: number = 0) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.USER}/record-study-day?newWordsMemorized=${newWordsMemorized}`, {
+        method: 'POST'
+    });
+    if (!response.ok) throw new Error('Failed to record study day');
+    return response.json();
+}

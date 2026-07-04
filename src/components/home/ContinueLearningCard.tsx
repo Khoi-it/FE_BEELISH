@@ -1,38 +1,61 @@
 import { useState, useEffect } from 'react';
-import { getContinueLearning } from '../../api/homeApi';
+import { getVideos } from '../../api/videosApi';
+import { useNavigate } from 'react-router-dom';
 
-const MOCK_LESSON = {
-  level: "Trung cấp",
-  imageAlt: "Restaurant lesson",
-  dataAlt: "Waitress taking an order in a bright modern restaurant",
-  imageSrc: "https://lh3.googleusercontent.com/aida-public/AB6AXuB5IWuPof2m_UWawDnZ_S3IgX8xbqZnIZr7GYEGcCKpo0eG5fFRXT1g0hC9FnvgrfB9zkIM-FxqtA2yhrLWJjDjeHfhNSpg_CYOk0sYYysoietOn2oS22Ay7HFXjDjKQK5z0t-LS88ymfP_vub4zzKXfsgJ-RDRSW5i-TCzhL_X4Bb0iIb9L_RuRFgLZmAoeKYL3I23bQFxQ9hiEITh7wgqXtP6nqDPjwHIXej4DwPrw8ZDFffmj2DBZwCSydLSpmGYVNiE32kV8qU",
-  duration: "12:45",
-  title: "Bài 12: Đặt món tại nhà hàng",
-  description: "Học cách sử dụng các mẫu câu lịch sự khi giao tiếp với phục vụ bàn.",
-  progress: 45
+const getYoutubeThumbnail = (url: string) => {
+  if (!url) return '';
+  const match = url.match(/[?&]v=([^&]+)/);
+  const videoId = match ? match[1] : null;
+  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+};
+
+const formatDuration = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
 export default function ContinueLearningCard() {
-  const [lessonData, setLessonData] = useState(MOCK_LESSON);
+  const navigate = useNavigate();
+  const [lessonData, setLessonData] = useState<any>(null);
 
   useEffect(() => {
     const fetchLesson = async () => {
       try {
-        const data = await getContinueLearning();
-        if (data) {
-          setLessonData(data);
+        const videos = await getVideos();
+        if (videos && videos.length > 0) {
+          const topVideo = videos.reduce((prev: any, current: any) => (prev.viewCount > current.viewCount) ? prev : current);
+          setLessonData({
+            id: topVideo.id,
+            level: "Phổ biến nhất",
+            imageAlt: topVideo.title,
+            dataAlt: topVideo.title,
+            imageSrc: getYoutubeThumbnail(topVideo.url) || 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=1470',
+            duration: formatDuration(topVideo.duration || 0),
+            title: topVideo.title,
+            description: "Video được xem nhiều nhất hiện tại. Khám phá ngay!",
+            views: topVideo.viewCount || 0
+          });
         }
       } catch (error) {
-        console.warn("Dùng mock data do API ContinueLearning chưa sẵn sàng:", error);
+        console.warn("Lỗi khi tải video gợi ý:", error);
       }
     };
     fetchLesson();
   }, []);
 
+  if (!lessonData) {
+      return (
+          <div className="col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white animate-pulse">
+              <div className="h-full w-full min-h-[300px] bg-slate-200"></div>
+          </div>
+      );
+  }
+
   return (
     <div className="col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white">
       <div className="flex items-center justify-between border-b-3 border-black bg-primary/10 p-6">
-        <h3 className="text-xl font-black uppercase tracking-tight">Tiếp tục học</h3>
+        <h3 className="text-xl font-black uppercase tracking-tight">Video xem nhiều nhất</h3>
         <span className="rounded-full bg-black px-3 py-1 text-xs font-black uppercase tracking-widest text-white">
           {lessonData.level}
         </span>
@@ -67,16 +90,16 @@ export default function ContinueLearningCard() {
           </p>
 
           <div className="mb-6">
-            <div className="mb-2 flex justify-between text-sm font-black uppercase">
-              <span>Tiến độ bài học</span>
-              <span>{lessonData.progress}%</span>
-            </div>
-            <div className="h-5 w-full overflow-hidden rounded-full border-3 border-black bg-slate-100">
-              <div className="h-full border-r-3 border-black bg-primary transition-all duration-1000" style={{ width: `${lessonData.progress}%` }} />
+            <div className="flex items-center gap-2 text-sm font-black text-slate-600">
+              <span className="material-symbols-outlined">visibility</span>
+              <span>{lessonData.views.toLocaleString()} lượt xem</span>
             </div>
           </div>
 
-          <button className="flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 chunky-btn font-black">
+          <button 
+            onClick={() => navigate(`/video/${lessonData.id}`)}
+            className="flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 chunky-btn font-black hover:bg-primary/80 transition-colors"
+          >
             <span className="material-symbols-outlined">play_circle</span>
             XEM VIDEO NGAY
           </button>
