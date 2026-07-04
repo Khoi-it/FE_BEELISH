@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, Search, Bell, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { getNotifications, markAllAsRead, NotificationItem } from '../../api/notificationApi';
 interface TopbarProps {
   toggleSidebar: () => void;
 }
@@ -9,6 +9,28 @@ interface TopbarProps {
 export default function Topbar({ toggleSidebar }: TopbarProps) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    getNotifications().then(res => {
+        setNotifications(Array.isArray(res) ? res : res || [])
+    }).catch(console.error)
+  }, []);
+
+  const unreadCount = notifications.filter(n => !(n.read ?? (n as any).isRead)).length;
+
+  const handleNotificationClick = async () => {
+      setShowNotifications(!showNotifications)
+      if (!showNotifications && unreadCount > 0) {
+          try {
+              await markAllAsRead();
+              setNotifications(prev => prev.map(n => ({...n, read: true, isRead: true})));
+          } catch (e) {
+              console.error(e)
+          }
+      }
+  }
 
   return (
     <nav className="admin-topbar d-flex justify-content-between align-items-center p-3 sticky-top">
@@ -31,12 +53,62 @@ export default function Topbar({ toggleSidebar }: TopbarProps) {
       </div>
 
       <div className="d-flex align-items-center gap-3">
-        <button className="btn btn-light border-3 border-dark p-2 position-relative d-flex align-items-center justify-content-center" style={{borderRadius: '0.5rem', boxShadow: '2px 2px 0px 0px var(--beelish-secondary)'}}>
-          <Bell size={20} />
-          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark">
-            3
-          </span>
-        </button>
+        <div className="position-relative">
+          <button 
+            onClick={handleNotificationClick}
+            className="btn btn-light border-3 border-dark p-2 position-relative d-flex align-items-center justify-content-center" 
+            style={{borderRadius: '0.5rem', boxShadow: '2px 2px 0px 0px var(--beelish-secondary)'}}
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+          
+          {showNotifications && (
+            <div 
+              className="position-absolute mt-2 bg-white border border-3 border-dark overflow-hidden" 
+              style={{ width: '320px', right: '-10px', zIndex: 1000, borderRadius: '0.75rem', boxShadow: '4px 4px 0px 0px var(--beelish-secondary)' }}
+            >
+              <div className="p-3 border-bottom border-2 border-dark" style={{ backgroundColor: 'rgba(var(--bs-primary-rgb), 0.2)' }}>
+                  <h6 className="fw-bold m-0">Thông báo</h6>
+              </div>
+              <div className="overflow-auto" style={{ maxHeight: '320px' }}>
+                  {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-muted small">
+                          Không có thông báo nào.
+                      </div>
+                  ) : (
+                      notifications.map(notif => {
+                          const isUnread = typeof notif.read !== 'undefined' ? !notif.read : !(notif as any).isRead;
+                          return (
+                              <div
+                                  key={notif.id}
+                                  className={`p-3 border-bottom border-light`}
+                                  style={{ backgroundColor: isUnread ? 'rgba(var(--bs-primary-rgb), 0.05)' : 'white' }}
+                              >
+                                  <div className="d-flex justify-content-between align-items-start mb-1">
+                                      <h6 className={`fw-bold m-0 ${isUnread ? 'text-dark' : 'text-secondary'}`} style={{ fontSize: '0.9rem' }}>
+                                          {notif.title}
+                                      </h6>
+                                      {isUnread && (
+                                          <div className="rounded-circle bg-danger flex-shrink-0 mt-1" style={{ width: '8px', height: '8px' }} />
+                                      )}
+                                  </div>
+                                  <p className="text-muted m-0 mt-1" style={{ fontSize: '0.8rem' }}>{notif.message}</p>
+                                  <span className="text-muted mt-2 d-block" style={{ fontSize: '0.7rem' }}>
+                                      {new Date(notif.createdAt).toLocaleString()}
+                                  </span>
+                              </div>
+                          );
+                      })
+                  )}
+              </div>
+            </div>
+          )}
+        </div>
         
         <div className="position-relative">
           <div 

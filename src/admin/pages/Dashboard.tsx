@@ -168,7 +168,7 @@ export default function Dashboard() {
                     <td className="fw-bold">{user.fullName}</td>
                     <td className="text-warning fw-bold">{user.totalXP} XP</td>
                     <td>
-                      <span className={`badge border border-dark ${user.rankPosition === 1 ? 'bg-primary' : user.rankPosition === 2 ? 'bg-warning text-dark' : user.rankPosition === 3 ? 'bg-danger' : 'bg-secondary'}`}>
+                      <span className={`badge border border-dark ${user.rankPosition === 1 ? 'bg-warning text-dark' : user.rankPosition === 2 ? 'bg-secondary' : user.rankPosition === 3 ? 'bg-danger' : 'bg-light text-dark'}`}>
                         {user.rankName}
                       </span>
                     </td>
