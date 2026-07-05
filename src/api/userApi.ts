@@ -48,6 +48,14 @@ export const getLastWeekStats= async () => {
     return response.json();
 }
 
+export const getLastMonthStats = async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.USER}/get-monthly-stats`, {
+        method: 'GET'
+    });
+    if (!response.ok) throw new Error('Failed to fetch last month stats');
+    return response.json();
+}
+
 export const recordStudyDay = async (newWordsMemorized: number = 0) => {
     const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.USER}/record-study-day?newWordsMemorized=${newWordsMemorized}`, {
         method: 'POST'
