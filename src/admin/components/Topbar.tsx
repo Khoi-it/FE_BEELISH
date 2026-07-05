@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Menu, Search, Bell, User, LogOut } from 'lucide-react';
+import { Menu, Search, Bell, User, LogOut, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNotifications, markAllAsRead, NotificationItem } from '../../api/notificationApi';
 interface TopbarProps {
@@ -131,8 +132,14 @@ export default function Topbar({ toggleSidebar }: TopbarProps) {
           {dropdownOpen && (
             <div 
               className="position-absolute end-0 mt-3 bg-white border border-3 border-dark p-1" 
-              style={{ minWidth: '150px', zIndex: 1000, borderRadius: '0.5rem', boxShadow: '4px 4px 0px 0px var(--beelish-secondary)' }}
+              style={{ minWidth: '200px', zIndex: 1000, borderRadius: '0.5rem', boxShadow: '4px 4px 0px 0px var(--beelish-secondary)' }}
             >
+              <Link 
+                to="/"
+                className="btn btn-light w-100 text-start fw-bold d-flex align-items-center gap-2 border-0 mb-1"
+              >
+                <Home size={16} /> Giao diện User
+              </Link>
               <button 
                 onClick={logout}
                 className="btn btn-light w-100 text-start text-danger fw-bold d-flex align-items-center gap-2 border-0"

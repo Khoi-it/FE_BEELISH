@@ -101,7 +101,7 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     return (
-      <section className="col-span-4 flex flex-col gap-6">
+      <section className="col-span-12 lg:col-span-4 flex flex-col gap-6">
         <div className="flex flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow">
           <div className="aspect-video relative bg-black group/video">
             {videoId ? (

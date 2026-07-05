@@ -46,14 +46,14 @@ export default function ContinueLearningCard() {
 
   if (!lessonData) {
       return (
-          <div className="col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white animate-pulse">
+          <div className="col-span-12 md:col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white animate-pulse">
               <div className="h-full w-full min-h-[300px] bg-slate-200"></div>
           </div>
       );
   }
 
   return (
-    <div className="col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white">
+    <div className="col-span-12 md:col-span-12 flex flex-col overflow-hidden rounded-none p-0 lg:col-span-8 chunky-card bg-white">
       <div className="flex items-center justify-between border-b-3 border-black bg-primary/10 p-6">
         <h3 className="text-xl font-black uppercase tracking-tight">Video xem nhiều nhất</h3>
         <span className="rounded-full bg-black px-3 py-1 text-xs font-black uppercase tracking-widest text-white">

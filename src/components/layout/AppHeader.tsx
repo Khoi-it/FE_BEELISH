@@ -22,6 +22,8 @@ export default function AppHeader() {
     const [showNotifications, setShowNotifications] = useState(false)
     const [userStats, setUserStats] = useState<{ currentStreak?: number, totalXp?: number } | null>(null)
     const unreadCount = notifications.filter(n => !(n.read ?? (n as any).isRead)).length
+    
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
@@ -66,7 +68,7 @@ export default function AppHeader() {
 
     return (
         <header
-            className="sticky top-4 z-50 flex items-center justify-between chunky-border bg-white px-4 py-3 rounded-xl chunky-shadow mb-8">
+            className="sticky top-4 z-50 flex items-center justify-between chunky-border bg-white px-4 py-3 rounded-xl chunky-shadow mb-8 relative">
             {/*LEFT*/}
             <div className="flex items-center gap-4 shrink-0">
                 <Link to={ROUTES.LANDING} className="flex items-center gap-2">
@@ -115,6 +117,15 @@ export default function AppHeader() {
                             <span className="material-symbols-outlined text-xl">stars</span>
                             <span className="text-sm hidden md:inline">{(userStats?.totalXp || 0).toLocaleString()} XP</span>
                         </div>
+
+                        {/*Admin Switch*/}
+                        {user?.roleId === 'ROLE_ADMIN' && (
+                            <Link to="/admin"
+                                  className="hidden sm:flex items-center gap-1.5 bg-indigo-300 border-3 border-black ring-2 ring-black px-2 md:px-3 py-1.5 rounded-xl font-bold shadow-[4px_4px_0px_0px_#283F3B] h-10 md:h-11 hover:-translate-y-0.5 transition-transform">
+                                <span className="material-symbols-outlined text-xl">admin_panel_settings</span>
+                                <span className="text-sm hidden md:inline">Admin</span>
+                            </Link>
+                        )}
 
                         {/*Notification*/}
                         <div className="relative">
@@ -191,7 +202,51 @@ export default function AppHeader() {
                         </button>
                     </Link>
                 )}
+
+                {/* Hamburger Menu Toggle */}
+                <button 
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="md:hidden flex items-center justify-center p-2 rounded-lg chunky-border hover:bg-primary/20 transition-colors ml-1"
+                >
+                    <span className="material-symbols-outlined text-2xl">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+                </button>
             </div>
+
+            {/* Mobile Dropdown Menu */}
+            {isMobileMenuOpen && (
+                <div className="absolute top-[110%] left-0 right-0 bg-white chunky-border rounded-xl chunky-shadow p-4 flex flex-col gap-4 md:hidden z-50">
+                    <nav className="flex flex-col gap-2">
+                        {navItems
+                            .filter(item => item.route === ROUTES.HOME ? isLoggedIn : true)
+                            .map(({label, route}) => (
+                            <Link key={route} to={route}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className="px-4 py-3 text-base font-bold hover:bg-primary/20 rounded-lg chunky-border bg-surface text-center">
+                                {label}
+                            </Link>
+                        ))}
+                    </nav>
+                    
+                    {isLoggedIn && (
+                        <div className="flex gap-2 justify-center mt-2 border-t-2 border-dashed border-secondary/20 pt-4">
+                            <div className="flex items-center gap-1.5 bg-white border-3 border-black ring-2 ring-black px-3 py-2 rounded-xl font-bold shadow-[4px_4px_0px_0px_#283F3B]">
+                                <span className="material-symbols-outlined text-orange-500 fill-1 text-xl">local_fire_department</span>
+                                <span className="text-sm">{userStats?.currentStreak || 0} Ngày</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-primary border-3 border-black ring-2 ring-black px-3 py-2 rounded-xl font-bold shadow-[4px_4px_0px_0px_#283F3B]">
+                                <span className="material-symbols-outlined text-xl">stars</span>
+                                <span className="text-sm">{(userStats?.totalXp || 0).toLocaleString()} XP</span>
+                            </div>
+                            {user?.roleId === 'ROLE_ADMIN' && (
+                                <Link to="/admin"
+                                      className="flex items-center gap-1.5 bg-indigo-300 border-3 border-black ring-2 ring-black px-3 py-2 rounded-xl font-bold shadow-[4px_4px_0px_0px_#283F3B]">
+                                    <span className="material-symbols-outlined text-xl">admin_panel_settings</span>
+                                </Link>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
         </header>
     )
 }

@@ -20,7 +20,7 @@ function formatTime(secondsIn: number) {
 
 export default function TranscriptCard({ transcripts = [], isLoading = false, activeIndex = -1, onTranscriptClick }: TranscriptCardProps) {
   return (
-    <section className="col-span-3 flex flex-col h-full max-h-[800px]">
+    <section className="col-span-12 lg:col-span-3 flex flex-col h-[400px] lg:h-full lg:max-h-[800px]">
       <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow">
         <div className="border-border-thick bg-primary p-4 text-center font-black uppercase tracking-widest border-b-2 flex justify-between items-center">
           <span>Transcript</span>

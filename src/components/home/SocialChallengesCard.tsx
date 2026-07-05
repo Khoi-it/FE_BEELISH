@@ -17,7 +17,7 @@ const MOCK_CHALLENGES = [
 
 export default function SocialChallengesCard() {
   return (
-    <div className="col-span-12 chunky-card bg-[#283F3B] p-6 text-white lg:col-span-6">
+    <div className="col-span-12 md:col-span-6 chunky-card bg-[#283F3B] p-6 text-white lg:col-span-6">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-xl font-black uppercase tracking-tight">Thách thức bạn bè</h3>
         <span className="material-symbols-outlined">group</span>
