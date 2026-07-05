@@ -1,18 +1,18 @@
-export const API_BASE_URL = 'http://localhost:8080';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const API_ENDPOINTS = {
-  AUTH: '/api/auth',
-  LOGIN: '/api/auth/login',
-  REGISTER: '/api/auth/register',
-  USER: '/api/user',
-  VIDEOS: '/api/video',
-  DICTATIONS: '/dictations',
-  VOCABULARY: '/vocabulary',
-  USER_VOCAB_SETS: '/api/user-vocab-set',
-  VOCAB_SETS: '/api/vocab-set',
-  WORDS: '/api/word',
-  CATEGORIES: '/api/category',
-  ADMIN: '/api/admin',
-  HOME: '/api/home',
-  NOTIFICATION: '/api/notification',
+  AUTH: import.meta.env.VITE_API_ENDPOINT_AUTH,
+  LOGIN: import.meta.env.VITE_API_ENDPOINT_LOGIN,
+  REGISTER: import.meta.env.VITE_API_ENDPOINT_REGISTER,
+  USER: import.meta.env.VITE_API_ENDPOINT_USER,
+  VIDEOS: import.meta.env.VITE_API_ENDPOINT_VIDEOS,
+  DICTATIONS: import.meta.env.VITE_API_ENDPOINT_DICTATIONS,
+  VOCABULARY: import.meta.env.VITE_API_ENDPOINT_VOCABULARY,
+  USER_VOCAB_SETS: import.meta.env.VITE_API_ENDPOINT_USER_VOCAB_SETS,
+  VOCAB_SETS: import.meta.env.VITE_API_ENDPOINT_VOCAB_SETS,
+  WORDS: import.meta.env.VITE_API_ENDPOINT_WORDS,
+  CATEGORIES: import.meta.env.VITE_API_ENDPOINT_CATEGORIES,
+  ADMIN: import.meta.env.VITE_API_ENDPOINT_ADMIN,
+  HOME: import.meta.env.VITE_API_ENDPOINT_HOME,
+  NOTIFICATION: import.meta.env.VITE_API_ENDPOINT_NOTIFICATION,
 };
