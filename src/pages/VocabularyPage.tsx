@@ -6,7 +6,11 @@ import ClozeView from '../components/vocabulary/ClozeView'
 import DeckCard from '../components/vocabulary/DeckCard'
 import StudyModeModal from '../components/vocabulary/StudyModeModal'
 import LoginRequiredModal from '../components/auth/LoginRequiredModal'
-import {getUserVocabSets, getSystemVocabSets, getWordsByDeckId, getCategories, recordStudySession} from '../api/vocabularyApi'
+import CreateVocabSetModal from '../components/vocabulary/CreateVocabSetModal'
+import {
+    getUserVocabSets, getSystemVocabSets, getWordsByDeckId, getCategories, recordStudySession, 
+    createCustomVocabSet, updateCustomVocabSet, deleteCustomVocabSet, addSystemVocabSet
+} from '../api/vocabularyApi'
 
 interface Category {
     id: number;
@@ -23,6 +27,7 @@ interface Deck {
     categoryID?: number;
     memoryWords?: string[];
     clozeWords?: string[];
+    isCustom?: boolean;
 }
 
 interface Word {
@@ -49,6 +54,8 @@ export default function VocabularyPage() {
     const [isStudyModalOpen, setIsStudyModalOpen] = useState(false)
     const [studyMode, setStudyMode] = useState<'flashcard' | 'cloze' | null>(null)
     const [showLoginModal, setShowLoginModal] = useState(false)
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [deckToEdit, setDeckToEdit] = useState<Deck | null>(null)
 
     const closeModal = () => setIsStudyModalOpen(false)
 
@@ -118,11 +125,11 @@ export default function VocabularyPage() {
                     const uDecks = await getUserVocabSets();
                     const actualUserDecks = Array.isArray(uDecks) ? uDecks : (uDecks || []);
                     
-                    const systemDeckIds = new Set(actualSystemDecks.map(d => String(d.id)));
+                    const systemDeckIds = new Set(actualSystemDecks.map((d: any) => String(d.id)));
                     const filteredUserDecks = actualUserDecks.filter((u: any) => !systemDeckIds.has(String(u.vocabID)));
-                    setUserDecks(filteredUserDecks);
+                    setUserDecks(filteredUserDecks.map((d: any) => ({ ...d, isCustom: true })));
 
-                    setSystemDecks(actualSystemDecks.map(sDeck => {
+                    setSystemDecks(actualSystemDecks.map((sDeck: any) => {
                         const userDeck = actualUserDecks.find((u: any) => String(u.vocabID) === String(sDeck.id));
                         return userDeck ? { ...sDeck, learningProgress: userDeck.learningProgress, memoryWords: userDeck.memoryWords } : sDeck;
                     }));
@@ -134,6 +141,68 @@ export default function VocabularyPage() {
         };
         fetchDecks();
     }, [user])
+
+    const reloadDecks = async () => {
+        if (!user) return;
+        try {
+            const [uDecks, sDecks] = await Promise.all([getUserVocabSets(), getSystemVocabSets()]);
+            const actualSystemDecks = Array.isArray(sDecks) ? sDecks : (sDecks || []);
+            const actualUserDecks = Array.isArray(uDecks) ? uDecks : (uDecks || []);
+            
+            const systemDeckIds = new Set(actualSystemDecks.map((d: any) => String(d.id)));
+            const filteredUserDecks = actualUserDecks.filter((u: any) => !systemDeckIds.has(String(u.vocabID)));
+            setUserDecks(filteredUserDecks.map((d: any) => ({ ...d, isCustom: true })));
+
+            setSystemDecks(actualSystemDecks.map((sDeck: any) => {
+                const userDeck = actualUserDecks.find((u: any) => String(u.vocabID) === String(sDeck.id));
+                return userDeck ? { ...sDeck, learningProgress: userDeck.learningProgress, memoryWords: userDeck.memoryWords } : sDeck;
+            }));
+        } catch(err) {
+            console.error(err);
+        }
+    };
+
+    const handleSaveCustomDeck = async (vocabSet: any, wordsList: any[]) => {
+        if (deckToEdit) {
+            const targetId = deckToEdit.vocabID || deckToEdit.id;
+            await updateCustomVocabSet(String(targetId), vocabSet, wordsList);
+            if (selectedDeck && (selectedDeck.vocabID === targetId || selectedDeck.id === targetId)) {
+                setSelectedDeck({...selectedDeck, title: vocabSet.title, numOfWords: wordsList.length, icon: vocabSet.icon});
+                setWords(wordsList);
+            }
+        } else {
+            await createCustomVocabSet(vocabSet, wordsList);
+        }
+        await reloadDecks();
+    };
+
+    const handleDeleteCustomDeck = async () => {
+        if (!selectedDeck) return;
+        if (confirm('Bạn có chắc chắn muốn xoá bộ từ này?')) {
+            const targetId = selectedDeck.vocabID || selectedDeck.id;
+            try {
+                await deleteCustomVocabSet(String(targetId));
+                setSelectedDeck(null);
+                await reloadDecks();
+            } catch(e) {
+                console.error(e);
+                alert('Có lỗi xảy ra khi xoá');
+            }
+        }
+    };
+
+    const handleAddSystemDeck = async () => {
+        if (!selectedDeck) return;
+        const targetId = selectedDeck.vocabID || selectedDeck.id;
+        try {
+            await addSystemVocabSet(String(targetId));
+            alert('Đã thêm vào bộ từ cá nhân thành công!');
+            await reloadDecks();
+        } catch(e) {
+            console.error(e);
+            alert('Có lỗi xảy ra khi thêm');
+        }
+    };
 
     useEffect(() => {
         if (!selectedDeck) return;
@@ -224,6 +293,10 @@ export default function VocabularyPage() {
                                             </h2>
                                             <button
                                                 type="button"
+                                                onClick={() => {
+                                                    setDeckToEdit(null);
+                                                    setIsCreateModalOpen(true);
+                                                }}
                                                 className="flex items-center gap-2 border-4 border-secondary bg-tertiary px-4 py-2 font-black uppercase text-on-tertiary brutalist-shadow brutalist-shadow-hover"
                                             >
                                                 <span className="material-symbols-outlined">add_circle</span>
@@ -307,13 +380,34 @@ export default function VocabularyPage() {
                                         <h1 className="font-headline text-5xl font-black uppercase italic tracking-tighter">{selectedDeck.title}</h1>
                                         <p className="mt-2 font-bold uppercase tracking-widest opacity-60">{selectedDeck.numOfWords || words.length} Words</p>
                                     </div>
-                                    <button
-                                        onClick={() => setIsStudyModalOpen(true)}
-                                        className="flex items-center gap-2 rounded-xl border-4 border-secondary bg-primary px-8 py-4 text-xl font-black uppercase text-secondary shadow-[6px_6px_0px_0px_#283f3b] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
-                                    >
-                                        <span className="material-symbols-outlined text-3xl">school</span>
-                                        Học từ vựng
-                                    </button>
+                                    <div className="flex flex-wrap items-center gap-4">
+                                        {selectedDeck.isCustom && (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        setDeckToEdit(selectedDeck);
+                                                        setIsCreateModalOpen(true);
+                                                    }}
+                                                    className="flex items-center gap-2 rounded-xl border-4 border-secondary bg-white px-4 py-2 font-black uppercase text-secondary transition-transform hover:-translate-y-1"
+                                                >
+                                                    <span className="material-symbols-outlined">edit</span> Sửa
+                                                </button>
+                                                <button
+                                                    onClick={handleDeleteCustomDeck}
+                                                    className="flex items-center gap-2 rounded-xl border-4 border-secondary bg-red-100 px-4 py-2 font-black uppercase text-red-600 transition-transform hover:-translate-y-1"
+                                                >
+                                                    <span className="material-symbols-outlined">delete</span> Xoá
+                                                </button>
+                                            </>
+                                        )}
+                                        <button
+                                            onClick={() => setIsStudyModalOpen(true)}
+                                            className="flex items-center gap-2 rounded-xl border-4 border-secondary bg-primary px-8 py-4 text-xl font-black uppercase text-secondary shadow-[6px_6px_0px_0px_#283f3b] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
+                                        >
+                                            <span className="material-symbols-outlined text-3xl">school</span>
+                                            Học từ vựng
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div
@@ -394,6 +488,20 @@ export default function VocabularyPage() {
                 isOpen={showLoginModal} 
                 onClose={() => setShowLoginModal(false)} 
             />
+
+            {/* ── Create/Edit Custom Vocab Set Modal ── */}
+            {isCreateModalOpen && (
+                <CreateVocabSetModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSave={handleSaveCustomDeck}
+                    initialData={deckToEdit ? {
+                        title: deckToEdit.title,
+                        icon: deckToEdit.icon,
+                        words: words as any
+                    } : undefined}
+                />
+            )}
         </div>
     )
 }
