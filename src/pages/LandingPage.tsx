@@ -4,7 +4,6 @@ import HeroSection from '../components/sections/HeroSection'
 import FeaturesSection from '../components/sections/FeaturesSection'
 import CtaSection from '../components/sections/CtaSection'
 import '../styles/LandingPage.module.css'
-import '../styles/LegacyGlobals.module.css'
 
 
 export default function LandingPage() {

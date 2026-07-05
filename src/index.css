@@ -10,3 +10,114 @@
 body {
   margin: 0;
 }
+
+/* === Global Legacy Styles === */
+.chunky-border {
+  border: 3px solid #283f3b;
+}
+
+.chunky-shadow {
+  box-shadow: 4px 4px 0px 0px #283f3b;
+}
+
+.chunky-shadow-active:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px #283f3b;
+}
+
+.squircle {
+  border-radius: 20%;
+}
+
+.chunky-card {
+  border: 3px solid black;
+  box-shadow: 6px 6px 0px 0px #283f3b;
+  transition: transform 0.1s ease;
+}
+
+.chunky-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px 0px #283f3b;
+}
+
+.chunky-btn {
+  border: 3px solid black;
+  box-shadow: 4px 4px 0px 0px #283f3b;
+}
+
+.chunky-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px #283f3b;
+}
+
+.chunky-shadow-sm {
+  box-shadow: 2px 2px 0px 0px #283f3b;
+}
+
+.hexagon {
+  background-color: #f3f4f6;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border: 1px solid black;
+  width: 30px;
+  height: 34px;
+}
+
+.hexagon.filled {
+  background-color: #ffbf00;
+}
+
+.honeycomb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #283f3b;
+  border-radius: 10px;
+}
+
+.brutalist-shadow {
+  box-shadow: 4px 4px 0px 0px #283f3b;
+}
+
+.brutalist-shadow-lg {
+  box-shadow: 8px 8px 0px 0px #283f3b;
+}
+
+.brutalist-shadow-hover:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #283f3b;
+}
+
+.chunky-shadow-login {
+  box-shadow: 6px 6px 0px 0px #283f3b;
+}
+
+.button-3d-primary {
+  box-shadow: 0px 4px 0px 0px #cc9900;
+  transition: all 0.1s ease;
+}
+
+.button-3d-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 0px 0px #cc9900;
+}
+
+.button-3d-secondary {
+  box-shadow: 0px 4px 0px 0px #d1d5db;
+  transition: all 0.1s ease;
+}
+
+.button-3d-secondary:active {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 0px 0px #d1d5db;
+}
