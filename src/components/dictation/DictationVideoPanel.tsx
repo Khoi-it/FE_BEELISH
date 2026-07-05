@@ -7,6 +7,7 @@ interface DictationVideoPanelProps {
   onTimeUpdate: (time: number) => void;
   onReplaySegment?: () => void;
   onReady?: () => void;
+  onVideoFinished?: () => void;
 }
 
 export interface DictationVideoRef {
@@ -27,7 +28,7 @@ const YOUTUBE_OPTS = {
 };
 
 const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelProps>(
-  ({ videoId, onTimeUpdate, onReplaySegment, onReady: onReadyCallback }, ref) => {
+  ({ videoId, onTimeUpdate, onReplaySegment, onReady: onReadyCallback, onVideoFinished }, ref) => {
     const playerRef = useRef<any>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -56,6 +57,11 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
         setIsPlaying(true);
       } else {
         setIsPlaying(false);
+      }
+      if (event.data === YouTube.PlayerState.ENDED) {
+        if (onVideoFinished) {
+          onVideoFinished();
+        }
       }
     };
 
@@ -101,7 +107,7 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
     const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     return (
-      <section className="col-span-4 flex flex-col gap-6">
+      <section className="col-span-12 lg:col-span-4 flex flex-col gap-6">
         <div className="flex flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow">
           <div className="aspect-video relative bg-black group/video">
             {videoId ? (
@@ -178,7 +184,7 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
           </div>
         </div>
 
-        <AchievementsCard />
+        {/* <AchievementsCard /> */}
       </section>
     )
   }

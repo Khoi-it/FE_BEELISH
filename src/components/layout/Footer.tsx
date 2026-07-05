@@ -7,10 +7,10 @@ const socialIcons = ['share', 'camera']
 
 export default function Footer() {
   return (
-    <footer className="border-t-[3px] border-[#283f3b] bg-white px-6 py-16 md:px-12">
+    <footer className="border-t-[3px] border-[#283f3b] bg-white px-6 py-10 md:py-16 md:px-12">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-4">
-          <div className="md:col-span-2">
+        <div className="mb-12 md:mb-16 grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-12">
+          <div className="col-span-2 md:col-span-2">
               <div className="flex items-center gap-2">
                   <div className="bg-primary rounded-lg chunky-border overflow-hidden w-10 h-10 md:w-12 md:h-12">
                       <img alt="Beelish Logo" className="w-full h-full object-cover" src={iconImage}/>

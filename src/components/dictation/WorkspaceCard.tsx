@@ -72,7 +72,7 @@ export default function WorkspaceCard({ activeTranscript, onSubmit, isCompleted,
 
   if (isCompleted) {
     return (
-      <section className="col-span-5 flex flex-col">
+      <section className="col-span-12 lg:col-span-5 flex flex-col">
         <div className="flex flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow flex-1 items-center justify-center p-8">
           <div className="w-24 h-24 rounded-full bg-dict-green/10 flex items-center justify-center mb-6">
             <span className="material-symbols-outlined text-6xl text-dict-green">done_all</span>
@@ -86,7 +86,7 @@ export default function WorkspaceCard({ activeTranscript, onSubmit, isCompleted,
   }
 
   return (
-    <section className="col-span-5 flex flex-col">
+    <section className="col-span-12 lg:col-span-5 flex flex-col">
       <div className="flex flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow flex-1">
         <div className="flex items-center justify-between border-b-2 border-border-thick bg-background-light p-4">
           <span className="text-sm font-black uppercase tracking-widest">Workspace</span>

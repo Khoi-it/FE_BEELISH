@@ -1,3 +1,6 @@
+import LoadingState from '../common/LoadingState';
+import ErrorState from '../common/ErrorState';
+
 export interface TranscriptItem {
   text: string;
   start: number;
@@ -8,6 +11,7 @@ interface TranscriptCardProps {
   transcripts?: TranscriptItem[];
   isLoading?: boolean;
   activeIndex?: number;
+  error?: string | null;
   onTranscriptClick?: (index: number) => void;
 }
 
@@ -18,22 +22,28 @@ function formatTime(secondsIn: number) {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export default function TranscriptCard({ transcripts = [], isLoading = false, activeIndex = -1, onTranscriptClick }: TranscriptCardProps) {
+export default function TranscriptCard({ transcripts = [], isLoading = false, error = null, activeIndex = -1, onTranscriptClick }: TranscriptCardProps) {
   return (
-    <section className="col-span-3 flex flex-col h-full max-h-[800px]">
+    <section className="col-span-12 lg:col-span-3 flex flex-col h-[400px] lg:h-full lg:max-h-[800px]">
       <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white chunky-border chunky-shadow">
         <div className="border-border-thick bg-primary p-4 text-center font-black uppercase tracking-widest border-b-2 flex justify-between items-center">
           <span>Transcript</span>
           {isLoading && <span className="text-xs animate-pulse">Loading...</span>}
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          {!isLoading && transcripts.length === 0 && (
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 relative">
+          {isLoading && transcripts.length === 0 && (
+             <LoadingState text="Đang tải phụ đề..." />
+          )}
+          {error && (
+             <ErrorState message={error} onRetry={() => window.location.reload()} />
+          )}
+          {!isLoading && !error && transcripts.length === 0 && (
             <div className="text-center text-sm font-bold opacity-50 p-4">
               No transcript available.
             </div>
           )}
-          {transcripts.map((item, idx) => {
+          {!isLoading && !error && transcripts.map((item, idx) => {
             const isActive = idx === activeIndex;
             const isFuture = idx > activeIndex;
             const isPast = idx < activeIndex;

@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { updateUser, updateImageUser } from '../../api/userApi'; 
 
 export default function EditProfileModal({ onClose }: { onClose: () => void }) {
-    const { user } = useAuth();
+    const { user, setUser } = useAuth();
     const [email, setEmail] = useState(user?.email || '');
     const [fulltName, setFulltName] = useState(user?.fullName || user?.name || '');
     const [level, setLevel] = useState(user?.level || '');
@@ -17,7 +17,18 @@ export default function EditProfileModal({ onClose }: { onClose: () => void }) {
 
     const handleSave = () => {
         updateUser({ name: fulltName, email, level })
-            .then(() => {
+            .then((res) => {
+                if (user) {
+                    const updatedUser = { 
+                        ...user, 
+                        fullName: fulltName, 
+                        name: fulltName, 
+                        level: level
+                    };
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+                window.dispatchEvent(new Event('userStatsUpdated'));
                 alert('Cập nhật hồ sơ thành công!');
                 onClose();
             })
@@ -44,8 +55,21 @@ export default function EditProfileModal({ onClose }: { onClose: () => void }) {
         try {
            
             // Gọi API upload
-            await updateImageUser(selectedFile);
+            const res = await updateImageUser(selectedFile);
             
+            if (user) {
+                const newAvatarUrl = res?.data?.avatar || res?.data?.url || res?.avatar || res?.url;
+                if (newAvatarUrl) {
+                    const updatedUser = { ...user, avatar: newAvatarUrl };
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                } else {
+                    // Fallback to blob URL for UI only, don't corrupt localStorage
+                    setUser({ ...user, avatar: avatar });
+                }
+            }
+            
+            window.dispatchEvent(new Event('userStatsUpdated'));
             alert('Cập nhật ảnh đại diện thành công!');
             setSelectedFile(null); // Reset file để ẩn nút "Xác nhận"
             
@@ -70,7 +94,7 @@ export default function EditProfileModal({ onClose }: { onClose: () => void }) {
                             <img
                                 alt="Current Avatar"
                                 className="h-full w-full object-cover"
-                                src={avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuDMBC2iyhNzwKbtQW0LNx7-rHsVPKPmFcj1tNWZntgSIeshoSJ3j8tL7857mMnQp8bn3KoZtZr_Fw8fxnpf3QBZg9q6xNgsVvwRvSiAl81jj1Lef9sEQU5qEttcnrsZUOiMgEMtwreYCAM0cq0J_S4Wgd-kV1XYSJd-08xDtlEAda9oXEJkaILVnRcNzuATzfuy-Nt96n27rXFmPEGh-I7R67xCjF_VUnkaw-KPTzTvWIanI2A8pQ5Fn7EVJFlK698-3U9j6VzXHV4"}
+                                src={avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
                             />
                         </div>
                         <div className="flex-1">

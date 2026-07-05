@@ -12,6 +12,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import { ROUTES } from './constants/routes'
 import AppAdmin from './admin/AppAdmin'
+import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
     return (
@@ -28,7 +29,7 @@ export default function App() {
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="*" element={<Navigate to={ROUTES.LANDING} replace />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
     )
 }

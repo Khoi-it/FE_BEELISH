@@ -8,6 +8,7 @@ import TranscriptCard, { TranscriptItem } from '../components/dictation/Transcri
 import Footer from '../components/layout/Footer.js'
 import { getVideoTranscript } from '../api/videosApi'
 import { recordStudyDay } from '../api/userApi'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function DictationPage() {
   const location = useLocation();
@@ -18,9 +19,13 @@ export default function DictationPage() {
 
   const [transcripts, setTranscripts] = useState<TranscriptItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [userInputs, setUserInputs] = useState<string[]>([]);
+  
+  const { user, setUser } = useAuth();
+  const [hasAddedVideoXP, setHasAddedVideoXP] = useState(false);
 
   const videoPanelRef = useRef<DictationVideoRef>(null);
 
@@ -36,6 +41,7 @@ export default function DictationPage() {
       if (!dbIdToFetch) return;
 
       setIsLoading(true);
+      setError(null);
 
       try {
         const data = await getVideoTranscript(dbIdToFetch.toString());
@@ -49,8 +55,9 @@ export default function DictationPage() {
         }).map((t: TranscriptItem) => ({ ...t, text: t.text.trim() }));
 
         setTranscripts(filteredTranscripts);
-      } catch (error) {
-        console.error("Failed to fetch transcript:", error);
+      } catch (err) {
+        console.error("Failed to fetch transcript:", err);
+        setError("Không thể tải phụ đề. Vui lòng thử lại.");
       } finally {
         setIsLoading(false);
       }
@@ -155,6 +162,17 @@ export default function DictationPage() {
     setIsVideoReady(true);
   }, []);
 
+  const handleVideoFinished = useCallback(() => {
+    if (!hasAddedVideoXP && user) {
+      setHasAddedVideoXP(true);
+      const updatedUser = { ...user, totalXP: (user.totalXP || 0) + 50 };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      alert("Chúc mừng! Bạn nhận được 50 XP vì đã hoàn thành xem video!");
+      window.dispatchEvent(new Event('userStatsUpdated'));
+    }
+  }, [hasAddedVideoXP, user, setUser]);
+
   return (
     <div className="flex flex-col min-h-screen bg-beige-custom text-border-thick">
       <div className="flex flex-col flex-1 mx-auto w-full max-w-[1440px] px-4 py-6 md:p-6">
@@ -167,6 +185,7 @@ export default function DictationPage() {
             onTimeUpdate={setCurrentTime}
             onReplaySegment={handleReplaySegment}
             onReady={handleVideoReady}
+            onVideoFinished={handleVideoFinished}
           />
           <WorkspaceCard
             activeTranscript={activeTranscript}
@@ -178,6 +197,7 @@ export default function DictationPage() {
           <TranscriptCard 
             transcripts={transcripts} 
             isLoading={isLoading} 
+            error={error}
             activeIndex={currentSegmentIndex}
             onTranscriptClick={handleTranscriptClick}
           />
