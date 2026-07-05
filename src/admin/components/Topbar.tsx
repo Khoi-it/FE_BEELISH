@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, Search, Bell, User, LogOut, Home } from 'lucide-react';
+import { Menu, Bell, User, LogOut, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNotifications, markAllAsRead, NotificationItem } from '../../api/notificationApi';
@@ -43,13 +43,7 @@ export default function Topbar({ toggleSidebar }: TopbarProps) {
           <Menu size={20} />
         </button>
         <div className="position-relative d-none d-md-block">
-          <input 
-            type="text" 
-            className="form-control border-3 border-dark" 
-            placeholder="Search anything..." 
-            style={{ paddingLeft: '40px', borderRadius: '0.5rem' }}
-          />
-          <Search size={18} className="position-absolute top-50 translate-middle-y text-muted" style={{ left: '12px' }} />
+    
         </div>
       </div>
 
