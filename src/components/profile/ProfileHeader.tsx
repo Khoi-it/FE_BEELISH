@@ -4,18 +4,12 @@ import { getStats } from '../../api/userApi';
 
 export default function ProfileHeader({ onEditClick }: { onEditClick: () => void }) {
     const { user, logout } = useAuth();
-    const [userStats, setUserStats] = useState<{ currentStreak?: number, rank?: string | null, level?: string } | null>(null);
+    const [userStats, setUserStats] = useState<{ currentStreak?: number, rank?: string | null } | null>(null);
 
     useEffect(() => {
-        const fetchStats = () => {
-            getStats().then(res => {
-                if (res) setUserStats(res);
-            }).catch(console.error);
-        };
-        fetchStats();
-        
-        window.addEventListener('userStatsUpdated', fetchStats);
-        return () => window.removeEventListener('userStatsUpdated', fetchStats);
+        getStats().then(res => {
+            if (res) setUserStats(res);
+        }).catch(console.error);
     }, []);
 
     const displayName = user?.fullName || 'Học viên Beelish';
@@ -49,7 +43,7 @@ export default function ProfileHeader({ onEditClick }: { onEditClick: () => void
                 </div>
 
                 <p className="pt-1 text-xl font-bold italic underline decoration-[#ffbf00] decoration-4">
-                    {userStats?.level || 'CHƯA XÁC ĐỊNH'}
+                    {user?.level || 'CHƯA XÁC ĐỊNH'}
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-4 pt-4 md:justify-start">
