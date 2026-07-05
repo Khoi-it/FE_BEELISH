@@ -7,6 +7,7 @@ interface DictationVideoPanelProps {
   onTimeUpdate: (time: number) => void;
   onReplaySegment?: () => void;
   onReady?: () => void;
+  onVideoFinished?: () => void;
 }
 
 export interface DictationVideoRef {
@@ -27,7 +28,7 @@ const YOUTUBE_OPTS = {
 };
 
 const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelProps>(
-  ({ videoId, onTimeUpdate, onReplaySegment, onReady: onReadyCallback }, ref) => {
+  ({ videoId, onTimeUpdate, onReplaySegment, onReady: onReadyCallback, onVideoFinished }, ref) => {
     const playerRef = useRef<any>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -56,6 +57,11 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
         setIsPlaying(true);
       } else {
         setIsPlaying(false);
+      }
+      if (event.data === YouTube.PlayerState.ENDED) {
+        if (onVideoFinished) {
+          onVideoFinished();
+        }
       }
     };
 
@@ -178,7 +184,7 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
           </div>
         </div>
 
-        <AchievementsCard />
+        {/* <AchievementsCard /> */}
       </section>
     )
   }

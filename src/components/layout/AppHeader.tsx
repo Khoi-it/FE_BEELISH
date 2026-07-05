@@ -68,7 +68,7 @@ export default function AppHeader() {
 
     return (
         <header
-            className="sticky top-4 z-50 flex items-center justify-between chunky-border bg-white px-4 py-3 rounded-xl chunky-shadow mb-8 relative">
+            className="sticky top-4 z-50 flex items-center justify-between chunky-border bg-white px-4 py-3 rounded-xl chunky-shadow mb-8">
             {/*LEFT*/}
             <div className="flex items-center gap-4 shrink-0">
                 <Link to={ROUTES.LANDING} className="flex items-center gap-2">
@@ -93,13 +93,6 @@ export default function AppHeader() {
 
             {/*RIGHT*/}
             <div className="flex items-center gap-2 md:gap-3 shrink-0">
-                {/*Search*/}
-                <div
-                    className="hidden lg:flex bg-white chunky-border rounded-lg px-3 py-1.5 items-center gap-2 h-10 md:h-12">
-                    <span className="material-symbols-outlined text-xl">search</span>
-                    <input className="border-none focus:ring-0 text-sm font-bold bg-transparent w-28 md:w-38"
-                           placeholder="Search..." type="text"/>
-                </div>
 
                 {isLoggedIn ? (
                     <>
@@ -140,7 +133,7 @@ export default function AppHeader() {
                                 )}
                             </button>
                             {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white chunky-border rounded-xl chunky-shadow overflow-hidden z-50">
+                                <div className="fixed sm:absolute top-[88px] sm:top-auto sm:mt-2 right-4 sm:-right-4 md:right-0 w-[calc(100vw-2rem)] sm:w-80 bg-white chunky-border rounded-xl chunky-shadow overflow-hidden z-50">
                                     <div className="p-3 border-b-2 border-black bg-primary/20">
                                         <h3 className="font-bold">Thông báo</h3>
                                     </div>
