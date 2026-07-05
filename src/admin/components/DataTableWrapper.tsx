@@ -8,12 +8,13 @@ interface DataTableWrapperProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onManage?: (id: string) => void;
+  onRowClick?: (id: string) => void;
   editLabel?: string;
   deleteLabel?: string;
   manageLabel?: string;
 }
 
-export default function DataTableWrapper({ data, columns, onEdit, onDelete, onManage, editLabel = 'Edit', deleteLabel = 'Delete', manageLabel = 'Manage' }: DataTableWrapperProps) {
+export default function DataTableWrapper({ data, columns, onEdit, onDelete, onManage, onRowClick, editLabel = 'Edit', deleteLabel = 'Delete', manageLabel = 'Manage' }: DataTableWrapperProps) {
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
 
@@ -66,6 +67,17 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete, onMa
         const id = $(this).data('id');
         if (onDelete) onDelete(id);
       });
+
+      if (onRowClick) {
+        $(tableRef.current).on('click', 'tbody tr', function(e) {
+          // Ignore clicks on action buttons
+          if ($(e.target).closest('button').length) return;
+          const rowData = dataTableRef.current.row(this).data();
+          if (rowData && rowData.id) {
+            onRowClick(rowData.id);
+          }
+        });
+      }
     }
 
     return () => {
@@ -77,13 +89,25 @@ export default function DataTableWrapper({ data, columns, onEdit, onDelete, onMa
         $(tableRef.current).off('click', '.manage-btn');
         $(tableRef.current).off('click', '.edit-btn');
         $(tableRef.current).off('click', '.delete-btn');
+        if (onRowClick) {
+          $(tableRef.current).off('click', 'tbody tr');
+        }
       }
     };
-  }, [data, columns, onEdit, onDelete]);
+  }, [data, columns, onEdit, onDelete, onManage, onRowClick]);
 
   return (
     <div className="table-responsive">
-      <table ref={tableRef} className="table table-striped table-hover w-100 align-middle">
+      {onRowClick && (
+        <style>
+          {`
+            .table-clickable tbody tr {
+              cursor: pointer;
+            }
+          `}
+        </style>
+      )}
+      <table ref={tableRef} className={`table table-striped table-hover w-100 align-middle ${onRowClick ? 'table-clickable' : ''}`}>
       </table>
     </div>
   );

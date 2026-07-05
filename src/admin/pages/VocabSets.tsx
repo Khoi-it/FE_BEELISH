@@ -142,8 +142,7 @@ export default function VocabSets() {
           columns={columns} 
           onEdit={handleEdit} 
           onDelete={handleDeleteClick} 
-          onManage={handleManage}
-          manageLabel="Words" 
+          onRowClick={handleManage}
         />
       </div>
 
