@@ -156,11 +156,11 @@ export default function DictationPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-beige-custom text-border-thick">
-      <div className="mx-auto max-w-[1440px] p-6">
+    <div className="flex flex-col min-h-screen bg-beige-custom text-border-thick">
+      <div className="flex flex-col flex-1 mx-auto w-full max-w-[1440px] px-4 py-6 md:p-6">
         <AppHeader />
         <DictationTitleBar title={videoTitle} accuracy={accuracy} />
-        <main className="grid grid-cols-12 gap-6">
+        <main className="flex-1 grid grid-cols-12 gap-6 mb-6">
           <DictationVideoPanel
             ref={videoPanelRef}
             videoId={videoIdToFetch}
@@ -182,8 +182,8 @@ export default function DictationPage() {
             onTranscriptClick={handleTranscriptClick}
           />
         </main>
-        <Footer />
       </div>
+      <Footer />
     </div>
   )
 }
