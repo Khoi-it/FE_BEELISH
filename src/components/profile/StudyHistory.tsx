@@ -48,6 +48,7 @@ interface ApiHistoryDailyItem {
 export default function StudyHistory() {
     const [history, setHistory] = useState<HistoryRowProps[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [visibleCount, setVisibleCount] = useState(3);
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -62,31 +63,56 @@ export default function StudyHistory() {
                         return;
                     }
 
-                    // 2. Map dữ liệu lịch sử theo từng ngày
-                    const mappedHistory = contentList.map((item, index) => {
-                        // Format lại ngày để hiển thị (từ chuỗi "2026-05-31" hoặc "updatedAt")
+                    // 2. Map dữ liệu lịch sử theo từng hoạt động
+                    const rawHistory: (HistoryRowProps & { timestamp: number })[] = [];
+                    contentList.forEach((item) => {
                         const dateObj = new Date(item.updatedAt || item.date);
                         const formattedDate = dateObj.toLocaleDateString('vi-VN', {
-                            day: '2-digit', 
-                            month: '2-digit', 
-                            year: 'numeric'
+                            day: '2-digit', month: '2-digit', year: 'numeric'
                         });
 
-                        // Lấy giờ phút nếu muốn hiển thị chi tiết (VD: 16:53)
-                        const formattedTime = dateObj.toLocaleTimeString('vi-VN', {
-                            hour: '2-digit', 
-                            minute: '2-digit'
-                        });
+                        if (item.vocabSets && item.vocabSets.length > 0) {
+                            item.vocabSets.forEach(v => {
+                                const isVideo = v.vocabId.startsWith('VID_');
+                                const timeObj = new Date(v.updatedAt || item.updatedAt || item.date);
+                                const formattedTime = timeObj.toLocaleTimeString('vi-VN', {
+                                    hour: '2-digit', minute: '2-digit'
+                                });
 
-                        return {
-                            icon: "style", // Dùng icon bộ thẻ (flashcards) hoặc "text_fields"
-                            iconBgClass: "bg-tertiary-container", 
-                            title: `Luyện tập từ vựng`, // Tên chung cho bài học trong ngày
-                            subtitle: `Học ${item.totalNumMemorizeNew} từ mới • ${formattedTime} ngày ${formattedDate}`, 
-                            xp: `+${item.totalXpNew}XP`,
-                            hasDashed: index < contentList.length - 1 
-                        };
+                                rawHistory.push({
+                                    icon: isVideo ? "play_circle" : "style",
+                                    iconBgClass: isVideo ? "bg-secondary-container" : "bg-tertiary-container",
+                                    title: isVideo ? `Xem video: ${v.vocabName}` : `Học từ vựng: ${v.vocabName}`,
+                                    subtitle: isVideo ? `Hoàn thành bài tập • ${formattedTime} ngày ${formattedDate}` : `Học ${v.numMemorizeNew} từ mới • ${formattedTime} ngày ${formattedDate}`,
+                                    xp: `+${v.xpNew}XP`,
+                                    hasDashed: true,
+                                    timestamp: timeObj.getTime()
+                                });
+                            });
+                        } else {
+                            // Backup in case there are no vocabSets details
+                            const formattedTime = dateObj.toLocaleTimeString('vi-VN', {
+                                hour: '2-digit', minute: '2-digit'
+                            });
+                            rawHistory.push({
+                                icon: "style",
+                                iconBgClass: "bg-tertiary-container", 
+                                title: `Luyện tập`, 
+                                subtitle: `Học ${item.totalNumMemorizeNew} từ mới • ${formattedTime} ngày ${formattedDate}`, 
+                                xp: `+${item.totalXpNew}XP`,
+                                hasDashed: true,
+                                timestamp: dateObj.getTime()
+                            });
+                        }
                     });
+
+                    // Sort descending by timestamp
+                    rawHistory.sort((a, b) => b.timestamp - a.timestamp);
+
+                    const mappedHistory = rawHistory.map((item, idx) => ({
+                        ...item,
+                        hasDashed: idx < rawHistory.length - 1
+                    }));
 
                     setHistory(mappedHistory);
                 }
@@ -113,14 +139,17 @@ export default function StudyHistory() {
                         Chưa có lịch sử học tập nào.
                     </div>
                 ) : (
-                    history.map((item, idx) => (
-                        <HistoryRow key={idx} {...item} />
+                    history.slice(0, visibleCount).map((item, idx, arr) => (
+                        <HistoryRow key={idx} {...item} hasDashed={idx < arr.length - 1} />
                     ))
                 )}
             </div>
 
-            {history.length > 0 && (
-                <button className="m-4 rounded-lg border-2 border-[#283f3b] px-2 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-zinc-50">
+            {history.length > visibleCount && (
+                <button 
+                    onClick={() => setVisibleCount(prev => prev + 3)}
+                    className="m-4 rounded-lg border-2 border-[#283f3b] px-2 py-2 text-xs font-black uppercase tracking-widest transition-colors hover:bg-zinc-50"
+                >
                     Xem tất cả
                 </button>
             )}

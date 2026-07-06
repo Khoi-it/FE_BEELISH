@@ -1,6 +1,8 @@
-// import styles from '../../styles/LandingPage.module.css'
+import { useNavigate } from 'react-router-dom'
 
 export default function HeroSection() {
+  const navigate = useNavigate()
+
   return (
     <section className="grid grid-cols-1 items-center gap-12 py-16 md:py-24 lg:grid-cols-2">
       <div className="flex flex-col gap-8">
@@ -22,6 +24,7 @@ export default function HeroSection() {
         <div className="flex flex-col gap-4 sm:flex-row">
           <button
             type="button"
+            onClick={() => navigate('/home')}
             className={`group relative flex items-center justify-center rounded-2xl bg-[#ffbf00] px-10 py-5 text-xl font-black transition-all hover:translate-x-1 hover:translate-y-1 border-[3px] border-[#283f3b] shadow-[8px_8px_0_0_#283f3b]`}
           >
             BẮT ĐẦU CÀY NGAY

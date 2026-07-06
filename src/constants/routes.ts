@@ -7,5 +7,11 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   PROFILE: '/profile',
+  TERMS: '/terms',
+  PRIVACY: '/privacy',
+  CONTACT: '/contact',
+  BLOG: '/blog',
+  FEATURES: '/features',
+  PRICING: '/pricing',
 }
 
