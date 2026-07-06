@@ -63,3 +63,13 @@ export const recordStudyDay = async (newWordsMemorized: number = 0) => {
     if (!response.ok) throw new Error('Failed to record study day');
     return response.json();
 }
+
+export const recordVideoSession = async (videoId: string, correctScriptsCount: number) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.USER}/record-video-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId, correctScriptsCount })
+    });
+    if (!response.ok) throw new Error('Failed to record video session');
+    return response.json();
+}

@@ -7,7 +7,7 @@ import WorkspaceCard from '../components/dictation/WorkspaceCard'
 import TranscriptCard, { TranscriptItem } from '../components/dictation/TranscriptCard'
 import Footer from '../components/layout/Footer.js'
 import { getVideoTranscript } from '../api/videosApi'
-import { recordStudyDay } from '../api/userApi'
+import { recordStudyDay, recordVideoSession } from '../api/userApi'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function DictationPage() {
@@ -91,11 +91,40 @@ export default function DictationPage() {
   useEffect(() => {
     if (isCompleted && !streakRecorded) {
       setStreakRecorded(true);
-      recordStudyDay(0).then(() => {
-        window.dispatchEvent(new Event('userStatsUpdated'));
-      }).catch(console.error);
+      const doRecord = async () => {
+        try {
+            await recordStudyDay(0);
+            
+            let perfectCount = 0;
+            transcripts.forEach((t, i) => {
+              const tWords = t.text.toLowerCase().replace(/[^\w\s]/gi, '').split(/\s+/).filter(Boolean);
+              const uWords = (userInputs[i] || '').toLowerCase().replace(/[^\w\s]/gi, '').split(/\s+/).filter(Boolean);
+              let isPerfect = tWords.length === uWords.length && tWords.length > 0;
+              if (isPerfect) {
+                tWords.forEach((tw, idx) => {
+                  if (tw !== uWords[idx]) isPerfect = false;
+                });
+              }
+              if (isPerfect) perfectCount++;
+            });
+
+            if (dbIdToFetch) {
+                const res = await recordVideoSession(dbIdToFetch.toString(), perfectCount);
+                if (res.xpGained > 0 && user) {
+                    const updatedUser = { ...user, totalXP: (user.totalXP || 0) + res.xpGained };
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    alert(`Chúc mừng! Bạn nhận được ${res.xpGained} XP vì có ${perfectCount} câu hoàn toàn đúng!`);
+                }
+            }
+            window.dispatchEvent(new Event('userStatsUpdated'));
+        } catch (e) {
+            console.error(e);
+        }
+      };
+      doRecord();
     }
-  }, [isCompleted, streakRecorded]);
+  }, [isCompleted, streakRecorded, transcripts, userInputs, dbIdToFetch, user, setUser]);
 
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
 
@@ -143,19 +172,26 @@ export default function DictationPage() {
   };
 
   const accuracy = useMemo(() => {
-    if (!isCompleted) return 0;
-    let correct = 0;
-    let total = 0;
+    if (!isCompleted || transcripts.length === 0) return 0;
+    let correctTranscripts = 0;
+    
     transcripts.forEach((t, i) => {
       const tWords = t.text.toLowerCase().replace(/[^\w\s]/gi, '').split(/\s+/).filter(Boolean);
       const uWords = (userInputs[i] || '').toLowerCase().replace(/[^\w\s]/gi, '').split(/\s+/).filter(Boolean);
-
-      total += tWords.length;
-      tWords.forEach((tw, idx) => {
-        if (tw === uWords[idx]) correct++;
-      });
+      
+      let isPerfect = tWords.length === uWords.length && tWords.length > 0;
+      if (isPerfect) {
+        tWords.forEach((tw, idx) => {
+          if (tw !== uWords[idx]) isPerfect = false;
+        });
+      }
+      
+      if (isPerfect) {
+        correctTranscripts++;
+      }
     });
-    return total > 0 ? Math.round((correct / total) * 100) : 0;
+    
+    return Math.round((correctTranscripts / transcripts.length) * 100);
   }, [isCompleted, transcripts, userInputs]);
 
   const handleVideoReady = useCallback(() => {
@@ -163,15 +199,11 @@ export default function DictationPage() {
   }, []);
 
   const handleVideoFinished = useCallback(() => {
-    if (!hasAddedVideoXP && user) {
+    if (!hasAddedVideoXP) {
       setHasAddedVideoXP(true);
-      const updatedUser = { ...user, totalXP: (user.totalXP || 0) + 50 };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      alert("Chúc mừng! Bạn nhận được 50 XP vì đã hoàn thành xem video!");
-      window.dispatchEvent(new Event('userStatsUpdated'));
+      // Removed the static +50XP to rely on the dynamic script accuracy XP instead.
     }
-  }, [hasAddedVideoXP, user, setUser]);
+  }, [hasAddedVideoXP]);
 
   return (
     <div className="flex flex-col min-h-screen bg-beige-custom text-border-thick">
@@ -182,6 +214,7 @@ export default function DictationPage() {
           <DictationVideoPanel
             ref={videoPanelRef}
             videoId={videoIdToFetch}
+            isCompleted={isCompleted}
             onTimeUpdate={setCurrentTime}
             onReplaySegment={handleReplaySegment}
             onReady={handleVideoReady}

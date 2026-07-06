@@ -4,6 +4,7 @@ import AchievementsCard from './AchievementsCard'
 
 interface DictationVideoPanelProps {
   videoId: string;
+  isCompleted?: boolean;
   onTimeUpdate: (time: number) => void;
   onReplaySegment?: () => void;
   onReady?: () => void;
@@ -28,7 +29,7 @@ const YOUTUBE_OPTS = {
 };
 
 const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelProps>(
-  ({ videoId, onTimeUpdate, onReplaySegment, onReady: onReadyCallback, onVideoFinished }, ref) => {
+  ({ videoId, isCompleted, onTimeUpdate, onReplaySegment, onReady: onReadyCallback, onVideoFinished }, ref) => {
     const playerRef = useRef<any>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -173,9 +174,20 @@ const DictationVideoPanel = forwardRef<DictationVideoRef, DictationVideoPanelPro
 
             <div className="flex items-center gap-4 px-2">
               <span className="text-sm font-bold w-10 text-right">{formatTime(currentTime)}</span>
-              <div className="relative flex-1 overflow-hidden rounded-full border-border-thick chunky-border h-4 bg-background-light">
+              <div 
+                className={`relative flex-1 overflow-hidden rounded-full border-border-thick chunky-border h-4 bg-background-light ${isCompleted ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                onClick={(e) => {
+                  if (!isCompleted || !playerRef.current || duration === 0) return;
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const newTime = (clickX / rect.width) * duration;
+                  playerRef.current.seekTo(newTime, true);
+                  setCurrentTime(newTime);
+                  onTimeUpdate(newTime);
+                }}
+              >
                 <div
-                  className="absolute left-0 top-0 h-full border-r-2 border-border-thick bg-primary transition-all duration-200"
+                  className="absolute left-0 top-0 h-full border-r-2 border-border-thick bg-primary transition-all duration-200 pointer-events-none"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
