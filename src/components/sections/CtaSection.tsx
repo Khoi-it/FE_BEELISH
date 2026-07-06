@@ -1,6 +1,8 @@
-// import styles from '../../styles/LandingPage.module.css'
+import { useNavigate } from 'react-router-dom'
 
 export default function CtaSection() {
+  const navigate = useNavigate()
+
   return (
     <section className="mb-20 py-20">
       <div className="relative overflow-hidden rounded-3xl bg-[#283f3b] p-12 text-center text-white md:p-20">
@@ -23,6 +25,7 @@ export default function CtaSection() {
         <div className="flex flex-col justify-center gap-6 sm:flex-row">
           <button
             type="button"
+            onClick={() => navigate('/home')}
             className={`rounded-2xl bg-[#ffbf00] px-12 py-5 text-xl font-black uppercase text-[#283f3b] transition-all hover:translate-x-1 hover:translate-y-1 border-[3px] border-[#283f3b]`}
             style={{ boxShadow: '4px 4px 0 0 white' }}
           >

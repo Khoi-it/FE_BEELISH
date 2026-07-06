@@ -11,6 +11,7 @@ const navItems = [
     {label: 'Tổng quan', route: ROUTES.HOME},
     {label: 'Từ vựng', route: ROUTES.VOCABULARY},
     {label: 'Video', route: ROUTES.VIDEO},
+    {label: 'Liên hệ', route: ROUTES.CONTACT},
 ]
 
 export default function AppHeader() {

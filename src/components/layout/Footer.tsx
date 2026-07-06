@@ -1,8 +1,18 @@
+import { Link } from "react-router-dom";
 import iconImage from "../../assets/icon.png";
 import textImage from "../../assets/text.png";
+import { ROUTES } from "../../constants/routes";
 
-const productLinks = ['Tính năng', 'Bảng giá', 'Blog']
-const supportLinks = ['Điều khoản', 'Bảo mật', 'Liên hệ']
+const productLinks = [
+  { label: 'Tính năng', route: ROUTES.FEATURES },
+  { label: 'Bảng giá', route: ROUTES.PRICING },
+  { label: 'Blog', route: ROUTES.BLOG }
+]
+const supportLinks = [
+  { label: 'Điều khoản', route: ROUTES.TERMS },
+  { label: 'Bảo mật', route: ROUTES.PRIVACY },
+  { label: 'Liên hệ', route: ROUTES.CONTACT }
+]
 const socialIcons = ['share', 'camera']
 
 export default function Footer() {
@@ -29,10 +39,10 @@ export default function Footer() {
             <h4 className="mb-6 font-black uppercase">Sản phẩm</h4>
             <ul className="flex flex-col gap-4 font-bold text-[#283f3bb3]">
               {productLinks.map((item) => (
-                <li key={item}>
-                  <a href="#" className="transition-colors hover:text-[#ffbf00]">
-                    {item}
-                  </a>
+                <li key={item.label}>
+                  <Link to={item.route} className="transition-colors hover:text-[#ffbf00]">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -42,10 +52,10 @@ export default function Footer() {
             <h4 className="mb-6 font-black uppercase">Hỗ trợ</h4>
             <ul className="flex flex-col gap-4 font-bold text-[#283f3bb3]">
               {supportLinks.map((item) => (
-                <li key={item}>
-                  <a href="#" className="transition-colors hover:text-[#ffbf00]">
-                    {item}
-                  </a>
+                <li key={item.label}>
+                  <Link to={item.route} className="transition-colors hover:text-[#ffbf00]">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>

@@ -36,8 +36,8 @@ export default function HomePage() {
 
           <HoneycombActivityCard checkinHistory={data?.checkinHistory} />
 
-          <SocialChallengesCard />
-          <UpcomingWorkshopCard />
+          {/* <SocialChallengesCard /> */}
+          {/* <UpcomingWorkshopCard /> */}
         </div>
 
         {!isAuthenticated && (
