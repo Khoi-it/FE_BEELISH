@@ -17,7 +17,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     { name: 'Users', path: '/admin/users', icon: <Users size={20} className="me-2" /> },
     { name: 'Notifications', path: '/admin/notifications', icon: <Bell size={20} className="me-2" /> },
     { name: 'Icons', path: '/admin/icons', icon: <ImageIcon size={20} className="me-2" /> },
-    { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} className="me-2" /> },
   ];
 
   return (

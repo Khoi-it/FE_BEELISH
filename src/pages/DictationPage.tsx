@@ -117,7 +117,11 @@ export default function DictationPage() {
                     alert(`Chúc mừng! Bạn nhận được ${res.xpGained} XP vì có ${perfectCount} câu hoàn toàn đúng!`);
                 }
             }
-            window.dispatchEvent(new Event('userStatsUpdated'));
+            
+            // Add a small delay to allow RabbitMQ to process stats in the background
+            setTimeout(() => {
+                window.dispatchEvent(new Event('userStatsUpdated'));
+            }, 1000);
         } catch (e) {
             console.error(e);
         }
