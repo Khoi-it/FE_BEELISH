@@ -8,6 +8,7 @@ import UpcomingWorkshopCard from '../components/home/UpcomingWorkshopCard'
 import Footer from '../components/layout/Footer.js'
 import LoadingState from '../components/common/LoadingState';
 import { useDashboardData } from '../hooks/useDashboardData';
+import LeaderboardCard from '../components/home/LeaderboardCard';
 
 export default function HomePage() {
   const { data, isAuthenticated, loading } = useDashboardData();
@@ -35,6 +36,8 @@ export default function HomePage() {
           <ContinueLearningCard />
 
           <HoneycombActivityCard checkinHistory={data?.checkinHistory} />
+          
+          <LeaderboardCard leaderboard={data?.leaderboard} />
 
           {/* <SocialChallengesCard /> */}
           {/* <UpcomingWorkshopCard /> */}

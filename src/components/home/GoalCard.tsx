@@ -9,7 +9,7 @@ export default function GoalCard({ dailyGoal, todayXP = 0, progressPercent = 0 }
   const dashoffset = 440 - (440 * progressPercent) / 100;
 
   return (
-    <div className="col-span-12 md:col-span-6 lg:col-span-4 flex flex-col items-center justify-center gap-0 p-6 text-center chunky-card bg-white">
+    <div className="col-span-12 lg:col-span-4 flex flex-col items-center justify-center gap-0 p-6 text-center chunky-card bg-white">
       <h3 className="mb-6 text-xl font-black uppercase tracking-tight">Mục tiêu hôm nay</h3>
 
       <div className="relative mb-6 flex h-40 w-40 items-center justify-center">

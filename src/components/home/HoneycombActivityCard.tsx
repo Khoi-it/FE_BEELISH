@@ -49,7 +49,7 @@ export default function HoneycombActivityCard({ checkinHistory = [] }: Honeycomb
   const yearPercentage = Math.round((yearActiveCount / 12) * 100);
 
   return (
-    <div className="col-span-12 chunky-card bg-white p-8">
+    <div className="col-span-12 lg:col-span-7 chunky-card bg-white p-8 min-w-0">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h3 className="text-2xl font-black uppercase tracking-tight">Tần suất học</h3>
@@ -71,59 +71,36 @@ export default function HoneycombActivityCard({ checkinHistory = [] }: Honeycomb
         </div>
       </div>
 
-      <div className="overflow-x-auto pb-4">
-        <div className="min-w-[800px]">
-          <div className="flex flex-wrap gap-4 justify-between">
-            <div className="flex flex-col gap-6">
-              {viewMode === 'month' ? (
-                <>
-                  <div className="flex flex-wrap gap-2 max-w-4xl">
-                    {row1.map((isFilled, idx) => (
-                      <div key={`r1-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} title={last30Days[idx]} />
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 max-w-4xl ml-4">
-                    {row2.map((isFilled, idx) => (
-                      <div key={`r2-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} title={last30Days[idx + 15]} />
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-wrap gap-4 max-w-4xl items-center h-full">
-                  {yearCells.map((isFilled, idx) => (
-                    <div key={`y-${idx}`} className="flex flex-col items-center gap-2">
-                      <div className={`hexagon ${isFilled ? 'filled' : ''} scale-125`} title={`Tháng ${idx + 1}: ${activeMonthsCount[idx]} ngày học`} />
-                      <span className="text-xs font-black uppercase opacity-50 mt-2">T{idx + 1}</span>
-                    </div>
+      <div className="w-full pb-4">
+        <div className="flex flex-col gap-6">
+          {viewMode === 'month' ? (
+              <>
+                <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                  {row1.map((isFilled, idx) => (
+                    <div key={`r1-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} title={last30Days[idx]} />
                   ))}
                 </div>
-              )}
-            </div>
 
-            <div className="max-w-[200px] rounded-2xl border-3 border-dashed border-black bg-primary/20 p-6 text-center flex flex-col items-center justify-center">
-              <span className="material-symbols-outlined mb-2 fill-1 text-4xl text-primary">hive</span>
-              {viewMode === 'month' ? (
-                <>
-                  <h4 className="text-lg font-black">{activeCount >= 15 ? 'TUYỆT VỜI!' : 'CỐ GẮNG LÊN!'}</h4>
-                  <p className="leading-tight text-xs font-bold">
-                    Bạn đã duy trì học được {activeCount}/30 ngày qua ({percentage}%).
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h4 className="text-lg font-black">{yearActiveCount >= 6 ? 'TUYỆT VỜI!' : 'CỐ GẮNG LÊN!'}</h4>
-                  <p className="leading-tight text-xs font-bold">
-                    Bạn đã học được {yearActiveCount}/12 tháng trong năm ({yearPercentage}%).
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
+                <div className="flex flex-wrap gap-2 ml-0 lg:ml-4 justify-center lg:justify-start">
+                  {row2.map((isFilled, idx) => (
+                    <div key={`r2-${idx}`} className={`hexagon ${isFilled ? 'filled' : ''}`} title={last30Days[idx + 15]} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-wrap gap-4 items-center justify-center lg:justify-start h-full">
+                {yearCells.map((isFilled, idx) => (
+                  <div key={`y-${idx}`} className="flex flex-col items-center gap-2">
+                    <div className={`hexagon ${isFilled ? 'filled' : ''} scale-125`} title={`Tháng ${idx + 1}: ${activeMonthsCount[idx]} ngày học`} />
+                    <span className="text-xs font-black uppercase opacity-50 mt-2">T{idx + 1}</span>
+                  </div>
+                ))}
+              </div>
+            )}
         </div>
       </div>
 
-      <div className="mt-6 flex items-center gap-6 text-sm font-bold opacity-60">
+      <div className="mt-4 flex items-center gap-6 text-sm font-bold opacity-60">
         <div className="flex items-center gap-2">
           <div className="hexagon h-5 w-4" />
           <span>Nghỉ ngơi</span>
@@ -133,6 +110,25 @@ export default function HoneycombActivityCard({ checkinHistory = [] }: Honeycomb
           <span>Đã học</span>
         </div>
         <div className="ml-auto">Cập nhật: Mới nhất</div>
+      </div>
+
+      <div className="w-full mt-8 rounded-2xl border-3 border-dashed border-black bg-primary/20 p-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
+        <span className="material-symbols-outlined fill-1 text-5xl text-primary">hive</span>
+        {viewMode === 'month' ? (
+          <div>
+            <h4 className="text-xl font-black mb-1">{activeCount >= 15 ? 'TUYỆT VỜI!' : 'CỐ GẮNG LÊN!'}</h4>
+            <p className="leading-tight text-sm font-bold text-slate-700">
+              Bạn đã duy trì học được <span className="text-primary text-lg">{activeCount}/30</span> ngày qua ({percentage}%).
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h4 className="text-xl font-black mb-1">{yearActiveCount >= 6 ? 'TUYỆT VỜI!' : 'CỐ GẮNG LÊN!'}</h4>
+            <p className="leading-tight text-sm font-bold text-slate-700">
+              Bạn đã học được <span className="text-primary text-lg">{yearActiveCount}/12</span> tháng trong năm ({yearPercentage}%).
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

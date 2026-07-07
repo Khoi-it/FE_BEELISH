@@ -7,12 +7,22 @@ interface VideoProgress {
   resumeAt: number;
 }
 
+interface LeaderboardUser {
+  id: string;
+  name: string;
+  xp: number;
+  rankPosition: number;
+  rankName: string;
+  isCurrentUser: boolean;
+}
+
 interface DashboardData {
   dailyGoal: string;
   todayXP: number;
   progressPercent: number;
   checkinHistory: string[];
   currentVideo: VideoProgress | null;
+  leaderboard: LeaderboardUser[];
 }
 
 export const useDashboardData = () => {
