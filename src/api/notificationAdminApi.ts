@@ -24,5 +24,9 @@ export const sendNotification = async (payload: { targetType: string, targetUser
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
-    return response.json();
+    if (!response.ok) {
+        throw new Error('Failed to send notification');
+    }
+    const text = await response.text();
+    return text ? JSON.parse(text) : { success: true, message: "Processing in background" };
 };

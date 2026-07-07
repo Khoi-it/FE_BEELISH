@@ -94,7 +94,10 @@ export default function VocabularyPage() {
             setSelectedDeck(prev => prev ? updateDeck(prev) : null);
 
             // Notify other components (like AppHeader) that stats have been updated
-            window.dispatchEvent(new Event('userStatsUpdated'));
+            // Add a small delay to allow RabbitMQ to process stats in the background
+            setTimeout(() => {
+                window.dispatchEvent(new Event('userStatsUpdated'));
+            }, 1000);
         } catch (err) {
             console.error('Lỗi lưu phiên học:', err);
         }
