@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
@@ -15,6 +15,42 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
   const [isRegistered, setIsRegistered] = useState(false)
+  const [isUsernameTaken, setIsUsernameTaken] = useState(false)
+  const [isEmailTaken, setIsEmailTaken] = useState(false)
+
+  useEffect(() => {
+    if (username.length >= 3 && !/\s/.test(username)) {
+      const timer = setTimeout(async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/check-username?username=${username}`);
+          const data = await res.json();
+          setIsUsernameTaken(data.exists);
+        } catch (e) {
+           console.error(e);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsUsernameTaken(false);
+    }
+  }, [username]);
+
+  useEffect(() => {
+    if (email.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const timer = setTimeout(async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH}/check-email?email=${email}`);
+          const data = await res.json();
+          setIsEmailTaken(data.exists);
+        } catch (e) {
+           console.error(e);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsEmailTaken(false);
+    }
+  }, [email]);
   const { setUser } = useAuth()
   const navigate = useNavigate()
 
@@ -135,6 +171,13 @@ export default function RegisterForm() {
       );
   }
 
+  const isFullNameInvalid = fullName.length > 0 && fullName.trim().length < 2;
+  const isUsernameInvalid = username.length > 0 && (username.trim().length < 3 || /\s/.test(username));
+  const isEmailInvalid = email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPasswordInvalid = password.length > 0 && password.length < 6;
+  const isConfirmPasswordInvalid = confirmPassword.length > 0 && confirmPassword !== password;
+  const isFormInvalid = isFullNameInvalid || isUsernameInvalid || isEmailInvalid || isPasswordInvalid || isConfirmPasswordInvalid || isUsernameTaken || isEmailTaken || !fullName || !username || !email || !password || !confirmPassword;
+
   return (
     <>
       <div className="mb-10 text-center">
@@ -153,11 +196,16 @@ export default function RegisterForm() {
           <input
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full rounded-xl border-2 border-moss-green bg-white px-5 py-4 text-moss-green placeholder:text-moss-green/40 font-semibold focus:border-primary focus:ring-0 transition-all"
+            className={`w-full rounded-xl border-2 bg-white px-5 py-4 font-semibold focus:ring-0 transition-all ${
+              isFullNameInvalid 
+                ? 'border-red-500 text-red-500 focus:border-red-500 placeholder:text-red-300' 
+                : 'border-moss-green text-moss-green focus:border-primary placeholder:text-moss-green/40'
+            }`}
             placeholder="Nguyễn Văn A"
             type="text"
             required
           />
+          {isFullNameInvalid && <p className="ml-1 text-sm font-bold text-red-500">Họ tên phải có ít nhất 2 ký tự</p>}
         </div>
 
         <div className="space-y-2">
@@ -165,11 +213,17 @@ export default function RegisterForm() {
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full rounded-xl border-2 border-moss-green bg-white px-5 py-4 text-moss-green placeholder:text-moss-green/40 font-semibold focus:border-primary focus:ring-0 transition-all"
+            className={`w-full rounded-xl border-2 bg-white px-5 py-4 font-semibold focus:ring-0 transition-all ${
+              isUsernameInvalid || isUsernameTaken
+                ? 'border-red-500 text-red-500 focus:border-red-500 placeholder:text-red-300' 
+                : 'border-moss-green text-moss-green focus:border-primary placeholder:text-moss-green/40'
+            }`}
             placeholder="Tên tài khoản của bạn"
             type="text"
             required
           />
+          {isUsernameInvalid && <p className="ml-1 text-sm font-bold text-red-500">Tên đăng nhập tối thiểu 3 ký tự, không chứa dấu cách</p>}
+          {!isUsernameInvalid && isUsernameTaken && <p className="ml-1 text-sm font-bold text-red-500">Tên đăng nhập đã tồn tại</p>}
         </div>
 
         <div className="space-y-2">
@@ -178,15 +232,23 @@ export default function RegisterForm() {
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border-2 border-moss-green bg-white px-5 py-4 text-moss-green placeholder:text-moss-green/40 font-semibold focus:border-primary focus:ring-0 transition-all"
+              className={`w-full rounded-xl border-2 bg-white px-5 py-4 font-semibold focus:ring-0 transition-all ${
+                isEmailInvalid || isEmailTaken
+                  ? 'border-red-500 text-red-500 focus:border-red-500 placeholder:text-red-300' 
+                  : 'border-moss-green text-moss-green focus:border-primary placeholder:text-moss-green/40'
+              }`}
               placeholder="example@beelish.vn"
               type="email"
               required
             />
-            <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-moss-green/50">
+            <span className={`material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 ${
+              isEmailInvalid || isEmailTaken ? 'text-red-500' : 'text-moss-green/50'
+            }`}>
               mail
             </span>
           </div>
+          {isEmailInvalid && <p className="ml-1 text-sm font-bold text-red-500">Email không hợp lệ</p>}
+          {!isEmailInvalid && isEmailTaken && <p className="ml-1 text-sm font-bold text-red-500">Email đã được sử dụng</p>}
         </div>
 
         <div className="space-y-2">
@@ -197,16 +259,23 @@ export default function RegisterForm() {
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border-2 border-moss-green bg-white px-5 py-4 text-moss-green placeholder:text-moss-green/40 font-semibold focus:border-primary focus:ring-0 transition-all"
+              className={`w-full rounded-xl border-2 bg-white px-5 py-4 font-semibold focus:ring-0 transition-all ${
+                isPasswordInvalid 
+                  ? 'border-red-500 text-red-500 focus:border-red-500 placeholder:text-red-300' 
+                  : 'border-moss-green text-moss-green focus:border-primary placeholder:text-moss-green/40'
+              }`}
               placeholder="••••••••"
               type="password"
               required
               minLength={6}
             />
-            <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-moss-green/50">
+            <span className={`material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer ${
+              isPasswordInvalid ? 'text-red-500' : 'text-moss-green/50'
+            }`}>
               visibility
             </span>
           </div>
+          {isPasswordInvalid && <p className="ml-1 text-sm font-bold text-red-500">Mật khẩu phải có ít nhất 6 ký tự</p>}
         </div>
 
         <div className="space-y-2">
@@ -215,15 +284,24 @@ export default function RegisterForm() {
             <input
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-xl border-2 border-moss-green bg-white px-5 py-4 text-moss-green placeholder:text-moss-green/40 font-semibold focus:border-primary focus:ring-0 transition-all"
+              className={`w-full rounded-xl border-2 bg-white px-5 py-4 font-semibold focus:ring-0 transition-all ${
+                isConfirmPasswordInvalid 
+                  ? 'border-red-500 text-red-500 focus:border-red-500 placeholder:text-red-300' 
+                  : 'border-moss-green text-moss-green focus:border-primary placeholder:text-moss-green/40'
+              }`}
               placeholder="••••••••"
               type="password"
               required
             />
-            <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-moss-green/50">
+            <span className={`material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer ${
+              isConfirmPasswordInvalid ? 'text-red-500' : 'text-moss-green/50'
+            }`}>
               visibility
             </span>
           </div>
+          {isConfirmPasswordInvalid && (
+            <p className="ml-1 text-sm font-bold text-red-500">Mật khẩu nhập lại không khớp!</p>
+          )}
         </div>
 
         {message.text && (
@@ -235,9 +313,9 @@ export default function RegisterForm() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || isFormInvalid}
           className={`w-full rounded-xl border-2 border-moss-green py-4 text-lg font-extrabold text-moss-green flex items-center justify-center gap-2 transition-all
-            ${isLoading ? 'bg-gray-300 cursor-not-allowed opacity-70' : 'bg-primary button-3d-primary hover:translate-y-[-2px]'}`}
+            ${isLoading || isFormInvalid ? 'bg-gray-300 cursor-not-allowed opacity-70' : 'bg-primary button-3d-primary hover:translate-y-[-2px]'}`}
         >
           <span>{isLoading ? 'Đang xử lý...' : 'Đăng ký'}</span>
           {!isLoading && <span className="material-symbols-outlined font-bold">arrow_forward</span>}
