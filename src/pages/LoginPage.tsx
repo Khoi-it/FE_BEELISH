@@ -7,6 +7,7 @@ import Footer from '../components/layout/Footer.tsx';
 import { useGoogleLogin } from '@react-oauth/google';
 import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
 import AuthMessageModal from '../components/auth/AuthMessageModal';
+import LearningGoalModal from '../components/auth/LearningGoalModal';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('')
@@ -14,6 +15,8 @@ export default function LoginPage() {
 
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState({ type: '', text: '' })
+    const [showGoalModal, setShowGoalModal] = useState(false);
+    const [pendingUser, setPendingUser] = useState<any>(null);
 
     const { setUser } = useAuth();
 
@@ -68,21 +71,25 @@ export default function LoginPage() {
                 throw new Error("Không nhận được dữ liệu xác thực từ máy chủ");
             }
 
-            setMessage({ type: 'success', text: 'Đăng nhập thành công!' })
-            setUser(result.user);
-            if (result.user) {
-                localStorage.setItem('user', JSON.stringify(result.user));
-            }
-
-            // Xóa form
             setUsername('')
             setPassword('')
 
-            // Chuyển sang trang admin hoặc trang chủ dựa vào role
-            if (result.user && result.user.roleId === 'ROLE_ADMIN') {
-                navigate('/admin');
+            if (result.user && !result.user.level && result.user.roleId !== 'ROLE_ADMIN') {
+                setPendingUser(result.user);
+                setShowGoalModal(true);
             } else {
-                navigate(ROUTES.HOME);
+                setMessage({ type: 'success', text: 'Đăng nhập thành công!' })
+                setUser(result.user);
+                if (result.user) {
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                }
+
+                // Chuyển sang trang admin hoặc trang chủ dựa vào role
+                if (result.user && result.user.roleId === 'ROLE_ADMIN') {
+                    navigate('/admin');
+                } else {
+                    navigate(ROUTES.HOME);
+                }
             }
         } catch (error) {
             // Kiểm tra xem error có phải là một Error object chuẩn không
@@ -125,16 +132,21 @@ export default function LoginPage() {
                 }
             }
 
-            setMessage({ type: 'success', text: 'Đăng nhập thành công!' });
-            setUser(result.user);
-            if (result.user) {
-                localStorage.setItem('user', JSON.stringify(result.user));
-            }
-
-            if (result.user && result.user.roleId === 'ROLE_ADMIN') {
-                navigate('/admin');
+            if (result.user && !result.user.level && result.user.roleId !== 'ROLE_ADMIN') {
+                setPendingUser(result.user);
+                setShowGoalModal(true);
             } else {
-                navigate(ROUTES.HOME);
+                setMessage({ type: 'success', text: 'Đăng nhập thành công!' });
+                setUser(result.user);
+                if (result.user) {
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                }
+
+                if (result.user && result.user.roleId === 'ROLE_ADMIN') {
+                    navigate('/admin');
+                } else {
+                    navigate(ROUTES.HOME);
+                }
             }
         } catch (error) {
             if (error instanceof Error) {
@@ -274,6 +286,16 @@ export default function LoginPage() {
                 message={message.text} 
                 onClose={() => setMessage({ type: '', text: '' })} 
             />
+
+            {showGoalModal && pendingUser && (
+                <LearningGoalModal 
+                    userTempData={pendingUser} 
+                    onSuccess={() => {
+                        setShowGoalModal(false);
+                        navigate(ROUTES.HOME);
+                    }} 
+                />
+            )}
         </div>
     )
 }
